@@ -8,7 +8,7 @@
 
 ![Suez Canal transits per day, 2019–2026: about 74 a day before the attacks, about 40 a day since, with no recovery.](outputs/charts/suez_transits.png)
 
-<p align="center"><b>Interactive dashboard: <code>docs/dashboard.html</code></b><br>
+<p align="center"><b><a href="https://4maxr.github.io/suez-portwatch/dashboard.html">Open the interactive dashboard &rarr;</a></b><br>
 <sub>Self-contained HTML · hover for exact values · route map · period and measure toggles · data tables · light &amp; dark</sub></p>
 
 ---
