@@ -1,0 +1,1197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>Suez Disruption Monitor</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Suez Canal and Red Sea shipping disruption 2019–2026 from IMF PortWatch AIS data: transits, re-routing via the Cape, vessel types, canal revenue proxy and Egypt's ports.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a navy "transit log" masthead, a sticky section index, then one finding per section:
+   question, answer headline, chart, how-to-read note, show-the-numbers table. */
+:root {
+  --paper: #f3f6f7;
+  --panel: #ffffff;
+  --ink: #0b1d2a;
+  --ink-2: #3f5466;
+  --ink-3: #66798a;
+  --rule: #d6e0e5;
+  --rule-2: #ebf0f2;
+  --accent: #0b7a8a;
+  --accent-soft: #ddf0f1;
+  --band: #e4ecef;
+  --land: #e7e2d6;
+  --sea: #eaf3f6;
+  --suez: #0b7a8a; --bab: #d9553a; --cape: #3a8a35; --gib: #7559c4; --mal: #8794a0;
+  --container: #2a6fb0; --dry_bulk: #b07f31; --tanker: #ad3b3b; --general_cargo: #4f9a8c; --roro: #7559c4;
+  --med: #2a6fb0; --gulf: #d9553a; --redsea: #b07f31;
+  --good: #1d7a46; --good-soft: #e2f3e9;
+  --warn: #946000; --warn-soft: #fbefd6;
+  --crit: #b3361f; --crit-soft: #fbe5df;
+  --mast: #08243a; --mast-2: #0e3350; --mast-ink: #eaf4f7; --mast-ink-2: #a9c3d0; --mast-line: #1d4865;
+  --shadow: 0 1px 2px rgb(11 29 42 / .05), 0 4px 16px rgb(11 29 42 / .05);
+  --f-display: "Archivo", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --f-body: "Source Sans 3", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --t-xs: .75rem; --t-sm: .8438rem; --t-base: .9688rem; --t-md: 1.0938rem;
+  --t-lg: 1.375rem; --t-xl: 1.875rem; --t-2xl: clamp(2.1rem, 5vw, 3.5rem);
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #06131c; --panel: #0c1e2b; --ink: #e5eef2; --ink-2: #aebfcb; --ink-3: #8597a5;
+    --rule: #1f3445; --rule-2: #142837; --accent: #3cbcc6; --accent-soft: #0e3036; --band: #132a3a;
+    --land: #1b2a33; --sea: #0a1a26;
+    --suez: #38b6c2; --bab: #ef7556; --cape: #69ba5c; --gib: #a28ce8; --mal: #7d8b97;
+    --container: #5b9be0; --dry_bulk: #d2a256; --tanker: #e06a6a; --general_cargo: #63b8a8; --roro: #a28ce8;
+    --med: #5b9be0; --gulf: #ef7556; --redsea: #d2a256;
+    --good: #5cc98a; --good-soft: #10301f; --warn: #e5b44c; --warn-soft: #33270d;
+    --crit: #f2876c; --crit-soft: #3a1a12;
+    --mast: #04111b; --mast-2: #0a2232; --mast-ink: #e5eef2; --mast-ink-2: #92aebd; --mast-line: #173a52;
+    --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 4px 16px rgb(0 0 0 / .22);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #06131c; --panel: #0c1e2b; --ink: #e5eef2; --ink-2: #aebfcb; --ink-3: #8597a5;
+  --rule: #1f3445; --rule-2: #142837; --accent: #3cbcc6; --accent-soft: #0e3036; --band: #132a3a;
+  --land: #1b2a33; --sea: #0a1a26;
+  --suez: #38b6c2; --bab: #ef7556; --cape: #69ba5c; --gib: #a28ce8; --mal: #7d8b97;
+  --container: #5b9be0; --dry_bulk: #d2a256; --tanker: #e06a6a; --general_cargo: #63b8a8; --roro: #a28ce8;
+  --med: #5b9be0; --gulf: #ef7556; --redsea: #d2a256;
+  --good: #5cc98a; --good-soft: #10301f; --warn: #e5b44c; --warn-soft: #33270d;
+  --crit: #f2876c; --crit-soft: #3a1a12;
+  --mast: #04111b; --mast-2: #0a2232; --mast-ink: #e5eef2; --mast-ink-2: #92aebd; --mast-line: #173a52;
+  --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 4px 16px rgb(0 0 0 / .22);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; animation: none !important; } }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font: 400 var(--t-base)/1.55 var(--f-body);
+  -webkit-font-smoothing: antialiased;
+}
+.wrap {
+  max-width: 1180px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+h1, h2, h3 { font-family: var(--f-display); font-stretch: 85%; text-wrap: balance; margin: 0; letter-spacing: -.005em; }
+p { margin: 0; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+/* ---------- Masthead ---------- */
+.masthead { position: relative; background: var(--mast); color: var(--mast-ink); overflow: hidden; }
+.masthead .contours { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: .55; }
+.masthead .contours path { fill: none; stroke: var(--mast-line); stroke-width: 1.2; }
+.masthead .wrap { position: relative; padding-block: 34px 26px; display: grid; gap: 22px; }
+.mast-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+.mast-top > div { min-width: 0; flex: 1 1 520px; }
+.stamp {
+  display: inline-flex; align-items: center; gap: 8px;
+  font: 500 var(--t-xs)/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase;
+  color: #7fd6dd; border: 1px solid #2b6f80; background: rgb(11 122 138 / .18); border-radius: 999px; padding: 6px 11px;
+}
+.stamp .dot { width: 7px; height: 7px; border-radius: 50%; background: #5fe0c8; box-shadow: 0 0 0 3px rgb(95 224 200 / .2); }
+h1 { font-size: var(--t-2xl); font-weight: 800; line-height: 1; margin-top: 14px; font-stretch: 78%; letter-spacing: -.01em; }
+.lede { font-size: var(--t-md); color: var(--mast-ink-2); max-width: 68ch; margin-top: 12px; }
+.lede b { color: var(--mast-ink); font-weight: 600; }
+.theme-btn {
+  font: 500 var(--t-sm)/1 var(--f-body); color: var(--mast-ink); background: transparent;
+  border: 1px solid var(--mast-line); border-radius: 999px; padding: 8px 14px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.theme-btn:hover { border-color: var(--mast-ink-2); }
+.log {
+  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); margin: 0;
+  border: 1px solid var(--mast-line); border-radius: 8px; overflow: hidden; background: var(--mast-line); gap: 1px;
+}
+.log > div { background: var(--mast-2); padding: 10px 14px 12px; min-width: 0; }
+.log dt { font: 500 .6875rem/1.2 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--mast-ink-2); }
+.log dd { margin: 5px 0 0; font: 600 var(--t-base)/1.25 var(--f-body); color: var(--mast-ink); overflow-wrap: anywhere; }
+.log dd small { display: block; font: 400 var(--t-xs)/1.3 var(--f-body); color: var(--mast-ink-2); margin-top: 2px; }
+@media (max-width: 900px) { .log { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .log { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* ---------- Section index (solid background; no backdrop-filter) ---------- */
+.index { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--paper); border-bottom: 1px solid var(--rule); }
+.index .wrap { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; padding-block: 8px; }
+.index .wrap::-webkit-scrollbar { display: none; }
+.index a { flex: none; text-decoration: none; color: var(--ink-2); font: 500 var(--t-sm)/1 var(--f-body); padding: 8px 12px; border-radius: 999px; white-space: nowrap; }
+.index a:hover { background: var(--rule-2); color: var(--ink); }
+.index a.on { background: var(--accent); color: var(--panel); }
+
+main .wrap { display: grid; gap: 28px; padding-block: 32px 56px; }
+main .wrap > * { min-width: 0; }
+
+/* ---------- Summary ---------- */
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 900px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 440px) { .kpis { grid-template-columns: minmax(0, 1fr); } }
+.kpi { background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); padding: 16px 16px 12px; display: grid; gap: 4px; min-width: 0; box-shadow: var(--shadow); }
+.kpi .label { font: 500 var(--t-sm)/1.3 var(--f-body); color: var(--ink-2); display: flex; align-items: center; gap: 8px; }
+.kpi .label i { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.kpi .value { font: 800 var(--t-xl)/1.1 var(--f-display); font-stretch: 80%; font-variant-numeric: tabular-nums; }
+.kpi .value small { font: 600 var(--t-sm)/1 var(--f-body); color: var(--ink-3); margin-left: 4px; }
+.kpi .delta { font: 500 var(--t-xs)/1.35 var(--f-mono); color: var(--ink-3); }
+.kpi .delta b.down { color: var(--crit); font-weight: 600; }
+.kpi .delta b.up { color: var(--good); font-weight: 600; }
+.kpi svg { width: 100%; height: 44px; display: block; margin-top: 6px; overflow: visible; }
+
+.insights { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 960px) { .insights { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .insights { grid-template-columns: minmax(0, 1fr); } }
+.insight { background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); padding: 16px 18px; display: grid; gap: 8px; align-content: start; min-width: 0; text-decoration: none; color: inherit; transition: border-color .15s, transform .15s; }
+.insight:hover { border-color: var(--accent); transform: translateY(-1px); }
+.insight h3 { font-size: var(--t-md); font-weight: 700; line-height: 1.25; }
+.insight p { color: var(--ink-2); font-size: var(--t-sm); }
+.insight .go { font: 500 var(--t-xs)/1 var(--f-mono); color: var(--accent); margin-top: 2px; }
+.chip { justify-self: start; display: inline-flex; align-items: center; gap: 6px; font: 500 .6875rem/1 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; padding: 5px 8px; border-radius: 4px; }
+.chip svg { width: 11px; height: 11px; }
+.chip.risk { color: var(--crit); background: var(--crit-soft); }
+.chip.watch { color: var(--warn); background: var(--warn-soft); }
+.chip.shift { color: var(--accent); background: var(--accent-soft); }
+.chip.pass { color: var(--good); background: var(--good-soft); }
+
+.section-head { display: grid; gap: 6px; }
+.section-head h2 { font-size: var(--t-lg); font-weight: 700; }
+.summary-title { display: flex; align-items: baseline; justify-content: space-between; gap: 6px 12px; flex-wrap: wrap; }
+.summary-title p { color: var(--ink-3); font-size: var(--t-sm); }
+
+/* ---------- Finding panels ---------- */
+.finding { background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; box-shadow: var(--shadow); padding: 22px 22px 18px; display: grid; gap: 16px; min-width: 0; }
+.finding > * { min-width: 0; }
+@media (max-width: 520px) { .finding { padding: 18px 14px 14px; border-radius: 12px; } }
+.finding header { display: grid; gap: 8px; }
+.qline { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.qline .q { font: 500 var(--t-xs)/1 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+.finding h2 { font-size: clamp(1.4rem, 2.8vw, 1.9rem); font-weight: 800; line-height: 1.12; max-width: 34ch; }
+.finding .context { color: var(--ink-2); max-width: 76ch; }
+.finding .context b { color: var(--ink); font-weight: 600; }
+.toolbar { display: flex; justify-content: space-between; align-items: center; gap: 10px 12px; flex-wrap: wrap; }
+.seg { display: inline-flex; background: var(--rule-2); border-radius: 8px; padding: 3px; gap: 2px; flex-wrap: wrap; }
+.seg button { font: 500 var(--t-sm)/1 var(--f-body); color: var(--ink-2); background: transparent; border: 0; padding: 7px 12px; border-radius: 6px; cursor: pointer; }
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--panel); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
+.toggles { display: flex; flex-wrap: wrap; gap: 6px; }
+.toggles button { font: 500 var(--t-sm)/1 var(--f-body); color: var(--ink-2); background: var(--panel); border: 1px solid var(--rule); border-radius: 999px; padding: 6px 11px 6px 9px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; }
+.toggles button i { width: 10px; height: 10px; border-radius: 50%; }
+.toggles button[aria-pressed="false"] { color: var(--ink-3); }
+.toggles button[aria-pressed="false"] i { background: transparent !important; box-shadow: inset 0 0 0 1.5px var(--ink-3); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: var(--t-sm); color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.legend i { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+.legend i.line { height: 3px; border-radius: 2px; width: 16px; }
+.legend i.dash { height: 0; width: 16px; border-top: 2px dashed var(--ink-3); border-radius: 0; background: none !important; }
+.legend i.diamond { width: 9px; height: 9px; transform: rotate(45deg); border-radius: 1px; margin: 0 2px; }
+
+.chart { position: relative; width: 100%; min-width: 0; }
+.chart svg { display: block; width: 100%; overflow: visible; }
+.chart text { font-family: var(--f-body); }
+.split { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+@media (max-width: 860px) { .split { grid-template-columns: minmax(0, 1fr); } }
+.side { display: grid; gap: 12px; align-content: start; min-width: 0; }
+.side h3 { font-size: var(--t-md); font-weight: 700; }
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stat { border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; min-width: 0; }
+.stat .k { font: 500 .6875rem/1.25 var(--f-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3); }
+.stat .v { font: 800 var(--t-lg)/1.15 var(--f-display); font-stretch: 80%; font-variant-numeric: tabular-nums; margin-top: 4px; }
+.stat .s { font-size: var(--t-xs); color: var(--ink-3); }
+.stat .v.neg { color: var(--crit); }
+.stat .v.pos { color: var(--good); }
+.events { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px 18px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); font-size: var(--t-xs); color: var(--ink-2); }
+.events li { display: flex; gap: 8px; align-items: baseline; }
+.events b { flex: none; display: inline-grid; place-items: center; width: 17px; height: 17px; border-radius: 50%; background: var(--ink); color: var(--panel); font: 600 .625rem/1 var(--f-mono); }
+.events span.d { font-family: var(--f-mono); color: var(--ink-3); flex: none; }
+
+.how { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; background: var(--rule-2); border-radius: 8px; padding: 10px 12px; font-size: var(--t-sm); color: var(--ink-2); }
+.how svg { width: 16px; height: 16px; color: var(--accent); margin-top: 2px; }
+.how b { color: var(--ink); font-weight: 600; }
+.note { font-size: var(--t-xs); color: var(--ink-3); max-width: 80ch; }
+
+details.table { border-top: 1px solid var(--rule); padding-top: 10px; }
+details.table summary { cursor: pointer; font: 500 var(--t-sm)/1 var(--f-body); color: var(--ink-2); list-style: none; display: inline-flex; align-items: center; gap: 8px; padding: 4px 0; }
+details.table summary::-webkit-details-marker { display: none; }
+details.table summary::before { content: "+"; font-family: var(--f-mono); width: 16px; text-align: center; color: var(--accent); }
+details.table[open] summary::before { content: "−"; }
+.tscroll { overflow-x: auto; margin-top: 10px; }
+table { border-collapse: collapse; width: 100%; font-size: var(--t-sm); font-variant-numeric: tabular-nums; }
+th, td { padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--rule-2); white-space: nowrap; }
+th { font: 500 .6875rem/1.2 var(--f-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3); border-bottom-color: var(--rule); }
+th:first-child, td:first-child { text-align: left; }
+tbody tr:hover td, tbody tr:hover th { background: var(--rule-2); }
+td.neg { color: var(--crit); } td.pos { color: var(--good); }
+
+/* Route map */
+.nodes { display: grid; gap: 8px; }
+.node { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; gap: 10px; align-items: center; border-bottom: 1px solid var(--rule-2); padding-bottom: 8px; }
+.node i { width: 12px; height: 12px; border-radius: 50%; }
+.node .n { font-weight: 600; }
+.node .r { font-size: var(--t-xs); color: var(--ink-3); }
+.node .v { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; font-size: var(--t-md); }
+.node .v small { display: block; font: 500 var(--t-xs)/1.2 var(--f-mono); }
+.node .v small.neg { color: var(--crit); } .node .v small.pos { color: var(--good); } .node .v small.flat { color: var(--ink-3); }
+
+/* ---------- Data integrity & about ---------- */
+.checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.check { border: 1px solid var(--rule); border-radius: 8px; padding: 12px 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.check .t { font-weight: 600; font-size: var(--t-sm); }
+.check .d { color: var(--ink-3); font-size: var(--t-xs); }
+.pipeline { display: flex; align-items: stretch; overflow-x: auto; padding-bottom: 4px; }
+.stage { flex: 1 0 132px; border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; display: grid; gap: 4px; align-content: start; background: var(--panel); }
+.stage .n { font: 800 var(--t-md)/1.1 var(--f-display); font-stretch: 85%; font-variant-numeric: tabular-nums; }
+.stage .k { font: 500 .6875rem/1.2 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+.stage .d { font-size: var(--t-xs); color: var(--ink-3); }
+.arrow { flex: none; width: 22px; display: grid; place-items: center; color: var(--ink-3); }
+.about-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px; }
+@media (max-width: 860px) { .about-grid { grid-template-columns: minmax(0, 1fr); } }
+dl.gloss { margin: 0; display: grid; gap: 10px; }
+dl.gloss div { display: grid; grid-template-columns: 124px minmax(0, 1fr); gap: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--rule-2); }
+dl.gloss dt { font: 600 var(--t-sm)/1.4 var(--f-mono); color: var(--ink); }
+dl.gloss dd { margin: 0; font-size: var(--t-sm); color: var(--ink-2); }
+@media (max-width: 440px) { dl.gloss div { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
+ul.limits { margin: 0; padding-left: 18px; display: grid; gap: 8px; font-size: var(--t-sm); color: var(--ink-2); }
+ul.limits b { color: var(--ink); font-weight: 600; }
+
+footer { border-top: 1px solid var(--rule); }
+footer .wrap { padding-block: 22px 32px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: var(--t-sm); color: var(--ink-3); }
+
+/* ---------- Tooltip ---------- */
+.tip { position: fixed; left: 0; top: 0; z-index: 50; pointer-events: none; min-width: 170px; max-width: 290px; background: var(--panel); color: var(--ink); border: 1px solid var(--rule); border-radius: 8px; box-shadow: 0 8px 24px rgb(0 0 0 / .16); padding: 10px 12px; font-size: var(--t-sm); opacity: 0; transform: translateY(4px); transition: opacity .12s, transform .12s; }
+.tip.on { opacity: 1; transform: none; }
+.tip .th { font: 600 var(--t-sm)/1.2 var(--f-body); margin-bottom: 6px; }
+.tip .row { display: grid; grid-template-columns: 10px 1fr auto; gap: 8px; align-items: center; padding: 2px 0; }
+.tip .row i { width: 10px; height: 10px; border-radius: 50%; }
+.tip .row span:last-child { font-variant-numeric: tabular-nums; font-weight: 600; }
+.tip .foot { color: var(--ink-3); font-size: var(--t-xs); margin-top: 6px; border-top: 1px solid var(--rule-2); padding-top: 6px; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-info" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5M8 4.6v.1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 16 16"><path d="M8 1.8 15 14H1L8 1.8Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 6.5v3.2M8 11.8v.1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 16 16"><path d="M1 8s2.6-4.8 7-4.8S15 8 15 8s-2.6 4.8-7 4.8S1 8 1 8Z" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="2" fill="currentColor"/></symbol>
+  <symbol id="i-shift" viewBox="0 0 16 16"><path d="M2 11h10l-3-3M14 5H4l3 3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-check" viewBox="0 0 16 16"><path d="m3 8.5 3.2 3L13 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 16 16"><path d="M3 8h10m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<header class="masthead">
+  <svg class="contours" viewBox="0 0 1200 360" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <path d="M-20 300 C 180 250, 320 330, 520 280 S 860 220, 1220 270"/>
+    <path d="M-20 330 C 200 290, 360 360, 560 315 S 900 260, 1220 305"/>
+    <path d="M-20 270 C 160 215, 300 300, 500 245 S 840 185, 1220 235"/>
+    <path d="M640 -20 C 700 60, 820 80, 900 40 S 1100 10, 1220 70"/>
+    <path d="M600 -20 C 670 90, 820 120, 920 80 S 1110 50, 1220 110"/>
+    <path d="M560 -20 C 640 120, 820 160, 940 120 S 1120 90, 1220 150"/>
+  </svg>
+  <div class="wrap">
+    <div class="mast-top">
+      <div>
+        <span class="stamp"><span class="dot"></span>Transit log · IMF PortWatch AIS data</span>
+        <h1>Suez Canal &amp; the Red Sea crisis, 2019–2026</h1>
+        <p class="lede" id="lede"></p>
+      </div>
+      <button class="theme-btn" id="theme-btn" type="button" aria-label="Switch colour theme"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5a6.5 6.5 0 1 0 0 13Z" fill="currentColor"/><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg><span>Theme</span></button>
+    </div>
+    <dl class="log" id="log"></dl>
+  </div>
+</header>
+
+<nav class="index" aria-label="Sections">
+  <div class="wrap" id="index">
+    <a href="#summary">Summary</a>
+    <a href="#suez">Suez transits</a>
+    <a href="#routes">Re-routing</a>
+    <a href="#vessels">Vessel types</a>
+    <a href="#revenue">Canal revenue</a>
+    <a href="#ports">Egypt's ports</a>
+    <a href="#integrity">Data integrity</a>
+    <a href="#about">About the data</a>
+  </div>
+</nav>
+
+<main>
+  <div class="wrap">
+
+    <section id="summary" class="section-head" aria-labelledby="sum-h">
+      <div class="summary-title">
+        <h2 id="sum-h">The latest 90 days against the months before the attacks</h2>
+        <p>Sparklines show monthly averages since 2019. Hover any chart for exact values.</p>
+      </div>
+    </section>
+    <div class="kpis" id="kpis"></div>
+
+    <section class="section-head" aria-labelledby="six-h">
+      <h2 id="six-h">Six things to know</h2>
+    </section>
+    <div class="insights" id="insights"></div>
+
+    <!-- Q1 -->
+    <section class="finding" id="suez" aria-labelledby="suez-h">
+      <header>
+        <div class="qline"><span class="q">Q1 · Suez Canal transits</span><span class="chip risk"><svg><use href="#i-alert"/></svg>No recovery</span></div>
+        <h2 id="suez-h">Suez traffic fell by almost half within two months and has stayed there</h2>
+        <p class="context" id="suez-ctx"></p>
+      </header>
+      <div class="split">
+        <div class="side" style="gap:14px">
+          <div class="toolbar">
+            <div class="seg" role="group" aria-label="Measure" id="suez-mode">
+              <button type="button" aria-pressed="true" data-v="transits">Ships per day</button>
+              <button type="button" aria-pressed="false" data-v="volume">Cargo tonnes per day</button>
+            </div>
+            <div class="legend" id="suez-legend"></div>
+          </div>
+          <div class="chart" id="suez-chart"></div>
+          <ol class="events" id="suez-events"></ol>
+        </div>
+        <aside class="side">
+          <h3>Daily average by period</h3>
+          <div class="stat-grid" id="suez-stats"></div>
+          <p class="note">The like-for-like check compares the latest 90 days with the same 90 calendar days of 2023, so seasonality cannot explain the gap.</p>
+        </aside>
+      </div>
+      <div class="how"><svg><use href="#i-info"/></svg><p><b>How to read it:</b> each point is one month's average number of cargo ships (or estimated cargo tonnes) crossing the canal per day. The dashed line is the January–October 2023 average, before the first attack, and the tinted area is the time since. Numbered markers are news events for context; they are not derived from the data.</p></div>
+      <details class="table"><summary>Show the numbers</summary><div class="tscroll" id="suez-table"></div></details>
+    </section>
+
+    <!-- Q2 -->
+    <section class="finding" id="routes" aria-labelledby="routes-h">
+      <header>
+        <div class="qline"><span class="q">Q2 · Where the traffic went</span><span class="chip shift"><svg><use href="#i-shift"/></svg>Re-routed</span></div>
+        <h2 id="routes-h">Ships went around Africa instead: the Cape of Good Hope now sees more ships than Suez did before the crisis</h2>
+        <p class="context" id="routes-ctx"></p>
+      </header>
+      <div class="split">
+        <div class="side" style="gap:12px">
+          <div class="toolbar">
+            <div class="seg" role="group" aria-label="Period" id="map-period">
+              <button type="button" aria-pressed="true" data-v="baseline">Jan–Oct 2023</button>
+              <button type="button" aria-pressed="false" data-v="crisis_2024">2024</button>
+              <button type="button" aria-pressed="false" data-v="latest">Latest 90 days</button>
+            </div>
+          </div>
+          <div class="chart" id="map"></div>
+          <p class="note">Schematic, not to scale. Line width is proportional to ships per day at each chokepoint. Malacca, upstream in Asia, is in the list and the chart below.</p>
+        </div>
+        <aside class="side">
+          <h3 id="nodes-h">Ships per day</h3>
+          <div class="nodes" id="nodes"></div>
+        </aside>
+      </div>
+      <div class="toolbar">
+        <div class="toggles" id="route-toggles" role="group" aria-label="Chokepoints shown"></div>
+        <div class="seg" role="group" aria-label="Measure" id="route-mode">
+          <button type="button" aria-pressed="true" data-v="transits">Ships</button>
+          <button type="button" aria-pressed="false" data-v="volume">Tonnes</button>
+        </div>
+      </div>
+      <div class="chart" id="route-chart"></div>
+      <div class="how"><svg><use href="#i-info"/></svg><p><b>How to read it:</b> Bab el-Mandeb is the southern entrance of the Red Sea and Suez its northern exit, so before the crisis the two lines moved together. The Cape of Good Hope is the long way round. Malacca, between the Indian Ocean and East Asia, sits upstream of the diversion: if it held steady, Asia–Europe trade kept moving and only the route changed. Tap the chips to add Gibraltar and Malacca.</p></div>
+      <details class="table"><summary>Show the numbers</summary><div class="tscroll" id="routes-table"></div></details>
+    </section>
+
+    <!-- Q3 -->
+    <section class="finding" id="vessels" aria-labelledby="ves-h">
+      <header>
+        <div class="qline"><span class="q">Q3 · Vessel types</span><span class="chip watch"><svg><use href="#i-eye"/></svg>Mix shift</span></div>
+        <h2 id="ves-h">Container ships and car carriers left first; tankers and bulk carriers held on more</h2>
+        <p class="context" id="ves-ctx"></p>
+      </header>
+      <div class="split">
+        <div class="side" style="gap:14px">
+          <div class="toolbar">
+            <div class="seg" role="group" aria-label="Measure" id="ves-mode">
+              <button type="button" aria-pressed="true" data-v="transits">Ships</button>
+              <button type="button" aria-pressed="false" data-v="volume">Tonnes</button>
+            </div>
+            <div class="seg" role="group" aria-label="Period" id="ves-period">
+              <button type="button" aria-pressed="true" data-v="2024">2024</button>
+              <button type="button" aria-pressed="false" data-v="latest">Latest 90 days</button>
+            </div>
+          </div>
+          <div class="chart" id="ves-chart"></div>
+        </div>
+        <aside class="side">
+          <h3>Who uses the canal now</h3>
+          <div class="legend" id="mix-legend"></div>
+          <div class="chart" id="mix-chart"></div>
+          <p class="note">Share of Suez transits by vessel type. Tankers were already the largest group, and their share grew because they left less than container ships did.</p>
+        </aside>
+      </div>
+      <div class="how"><svg><use href="#i-info"/></svg><p><b>How to read it:</b> each bar is the change in daily Suez transits (or estimated cargo tonnes) for one vessel type, compared with January–October 2023. A tonnage fall larger than the ship-count fall means the biggest ships of that type were the ones that left.</p></div>
+      <details class="table"><summary>Show the numbers</summary><div class="tscroll" id="ves-table"></div></details>
+    </section>
+
+    <!-- Q4 -->
+    <section class="finding" id="revenue" aria-labelledby="rev-h">
+      <header>
+        <div class="qline"><span class="q">Q4 · Impact on Egypt · Canal revenue</span><span class="chip risk"><svg><use href="#i-alert"/></svg>Risk</span></div>
+        <h2 id="rev-h">A tonnage-based proxy puts canal revenue near $4bn a year, down from $10.25bn</h2>
+        <p class="context" id="rev-ctx"></p>
+      </header>
+      <div class="split">
+        <div class="side" style="gap:14px">
+          <div class="legend" id="rev-legend"></div>
+          <div class="chart" id="rev-chart"></div>
+        </div>
+        <aside class="side">
+          <h3>Since the first attack (19 Nov 2023)</h3>
+          <div class="stat-grid" id="rev-stats"></div>
+          <p class="note" id="rev-note"></p>
+        </aside>
+      </div>
+      <div class="how"><svg><use href="#i-info"/></svg><p><b>How to read it:</b> bars scale the Suez Canal Authority's reported 2023 revenue by PortWatch's estimate of cargo tonnes crossing the canal each year. Tolls are charged on ship tonnage, so tonnage tracks revenue better than ship counts. The 2024 diamond is the SCA's own figure, which the proxy did not use: it shows how close the proxy gets. The dashed 2026 bar is annualised from data to date.</p></div>
+      <details class="table"><summary>Show the numbers</summary><div class="tscroll" id="rev-table"></div></details>
+    </section>
+
+    <!-- Q4b -->
+    <section class="finding" id="ports" aria-labelledby="ports-h">
+      <header>
+        <div class="qline"><span class="q">Q4 · Impact on Egypt · Ports</span><span class="chip shift"><svg><use href="#i-shift"/></svg>Shift</span></div>
+        <h2 id="ports-h">Egypt's ports did not lose traffic overall, and El Sokhna on the Gulf of Suez nearly tripled its port calls</h2>
+        <p class="context" id="ports-ctx"></p>
+      </header>
+      <div class="toolbar">
+        <div class="seg" role="group" aria-label="Measure" id="ports-mode">
+          <button type="button" aria-pressed="true" data-v="calls">All port calls</button>
+          <button type="button" aria-pressed="false" data-v="box">Container calls</button>
+          <button type="button" aria-pressed="false" data-v="trade">Cargo tonnes</button>
+        </div>
+        <div class="legend" id="ports-legend"></div>
+      </div>
+      <div class="split">
+        <div class="chart" id="ports-chart"></div>
+        <aside class="side">
+          <h3>Port calls per day, by coast</h3>
+          <div class="legend" id="coast-legend"></div>
+          <div class="chart" id="coast-chart"></div>
+        </aside>
+      </div>
+      <div class="how"><svg><use href="#i-info"/></svg><p><b>How to read it:</b> each bar is the change in a port's daily calls (or cargo tonnes) in the latest 90 days against January–October 2023, with the before → after level beside it. Colour shows the coast. A port call is a ship entering the port to load or unload; PortWatch excludes short stops for fuel or anchoring.</p></div>
+      <details class="table"><summary>Show the numbers</summary><div class="tscroll" id="ports-table"></div></details>
+    </section>
+
+    <!-- Integrity -->
+    <section class="finding" id="integrity" aria-labelledby="int-h">
+      <header>
+        <div class="qline"><span class="q">Q5 · Data integrity</span><span class="chip pass"><svg><use href="#i-check"/></svg>All checks passed</span></div>
+        <h2 id="int-h">Can these numbers be trusted?</h2>
+        <p class="context" id="int-ctx"></p>
+      </header>
+      <div class="checks" id="checks"></div>
+      <div class="side">
+        <h3>The pipeline finds the Ever Given on its own</h3>
+        <p class="context" style="font-size:var(--t-sm)" id="eg-ctx"></p>
+        <div class="tscroll" id="outlier-table"></div>
+      </div>
+      <details class="table"><summary>Show coverage by chokepoint and port</summary><div class="tscroll" id="int-table"></div></details>
+    </section>
+
+    <!-- About -->
+    <section class="finding" id="about" aria-labelledby="abo-h">
+      <header>
+        <div class="qline"><span class="q">About the data</span></div>
+        <h2 id="abo-h">Where the numbers come from and how they were processed</h2>
+        <p class="context"><b>IMF PortWatch</b> is a platform from the International Monetary Fund and the University of Oxford that turns ship-position signals (AIS) into daily counts of ships passing 28 maritime chokepoints and calling at about 2,000 ports, with an estimate of the cargo each ship carried. It is published as open ArcGIS feature layers, which this project downloads without a key.</p>
+      </header>
+      <div class="pipeline" id="pipeline"></div>
+      <div class="about-grid">
+        <div class="side">
+          <h3>Glossary</h3>
+          <dl class="gloss">
+            <div><dt>AIS</dt><dd>Automatic Identification System: the position, speed and identity signal that cargo ships broadcast. Received by coastal stations and satellites.</dd></div>
+            <div><dt>Transit</dt><dd>A ship crossing a chokepoint's boundary. A ship is not counted again at the same chokepoint within 48 hours.</dd></div>
+            <div><dt>Port call</dt><dd>A ship entering a port to load or unload. Stops under 5 hours with no change in draft (bunkering, anchoring) are excluded.</dd></div>
+            <div><dt>Cargo tonnes</dt><dd>PortWatch's estimate of cargo on board: how deep the ship sits in the water (its payload share) times its deadweight tonnage.</dd></div>
+            <div><dt>DWT</dt><dd>Deadweight tonnage: the most a ship can carry, in metric tonnes.</dd></div>
+            <div><dt>Baseline</dt><dd>January–October 2023: the ten months before the first Houthi attack on merchant shipping (19 Nov 2023).</dd></div>
+            <div><dt>SCA</dt><dd>Suez Canal Authority, the canal's operator. Its published revenue anchors the proxy.</dd></div>
+          </dl>
+        </div>
+        <div class="side">
+          <h3>Limitations</h3>
+          <ul class="limits">
+            <li><b>Estimates, not manifests.</b> Ship counts come from AIS tracks; cargo tonnes are modelled from draft and ship size. Neither is a customs or canal-authority record.</li>
+            <li><b>Five cargo types only.</b> Container, dry bulk, general cargo, ro-ro and tanker. Passenger ships, naval vessels and small craft are not counted, and LNG carriers sit inside "tanker".</li>
+            <li><b>Revenue is a proxy.</b> It assumes revenue moves with tonnage. Toll rates, rebates and the mix of ship sizes all changed after 2023, so it is a scale estimate, not an accounting figure.</li>
+            <li><b>Timing, not proof of cause.</b> The drop lines up with the attacks, but the data cannot separate the security effect from freight rates, insurance costs or carrier network decisions.</li>
+            <li><b>Noisy single days.</b> AIS reception gaps create one-day spikes and dips, especially at the Cape. All findings use monthly or multi-month averages.</li>
+            <li><b>Port boundaries are PortWatch's.</b> Port Said may combine the east and west terminals; El Sokhna's gains may partly reflect new terminal capacity, which this data cannot see.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Source: IMF PortWatch (portwatch.imf.org), daily AIS-based estimates; Suez Canal Authority revenue statements for 2023 and 2024. Built <span id="built"></span>.</span>
+    <span>Analysis: Mustafa Al-Rouby · Python, DuckDB, SQL</span>
+  </div>
+</footer>
+
+<div class="tip" id="tip" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  "use strict";
+  const D = {"months":["2019-01","2019-02","2019-03","2019-04","2019-05","2019-06","2019-07","2019-08","2019-09","2019-10","2019-11","2019-12","2020-01","2020-02","2020-03","2020-04","2020-05","2020-06","2020-07","2020-08","2020-09","2020-10","2020-11","2020-12","2021-01","2021-02","2021-03","2021-04","2021-05","2021-06","2021-07","2021-08","2021-09","2021-10","2021-11","2021-12","2022-01","2022-02","2022-03","2022-04","2022-05","2022-06","2022-07","2022-08","2022-09","2022-10","2022-11","2022-12","2023-01","2023-02","2023-03","2023-04","2023-05","2023-06","2023-07","2023-08","2023-09","2023-10","2023-11","2023-12","2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08","2026-09"],"events":[{"date":"2023-11-19","label":"Galaxy Leader seized"},{"date":"2023-12-15","label":"Major container lines pause Red Sea"},{"date":"2025-01-19","label":"Gaza ceasefire; attacks pause"},{"date":"2025-07-07","label":"Two bulk carriers sunk"},{"date":"2025-10-10","label":"Gaza ceasefire"}],"periods":[{"period":"y2019","period_label":"2019 (pre-COVID)","sort_order":1,"start_date":"2019-01-01","end_date":"2019-12-31"},{"period":"baseline","period_label":"Jan-Oct 2023 (baseline)","sort_order":2,"start_date":"2023-01-01","end_date":"2023-10-31"},{"period":"crisis_2024","period_label":"2024","sort_order":3,"start_date":"2024-01-01","end_date":"2024-12-31"},{"period":"year_2025","period_label":"2025","sort_order":4,"start_date":"2025-01-01","end_date":"2025-12-31"},{"period":"latest_2023","period_label":"Same 90 days of 2023","sort_order":5,"start_date":"2023-07-12","end_date":"2023-10-09"},{"period":"latest","period_label":"Latest 90 days","sort_order":6,"start_date":"2026-07-12","end_date":"2026-10-09"}],"meta":{"built":"2026-10-19","extracted":"2026-10-19","last_chokepoint_date":"2026-10-11","last_port_date":"2026-10-09","first_year":2019,"raw_files":16,"silver_rows":116455,"chokepoint_rows":79548,"port_rows":36907,"fact_rows":582275,"gold_tables":7,"latest_window_days":90,"layers":[{"name":"chokepoint_transits","service":"Daily_Chokepoints_Data","description":"Daily transit calls and estimated trade volume (t) for all 28 PortWatch chokepoints"},{"name":"egypt_port_calls","service":"Daily_Ports_Data","description":"Daily port calls and estimated import/export volume (t) for every Egyptian port"}],"sca":{"revenue_2023":10250000000.0,"revenue_2024":3991000000.0,"transits_2023":26434,"transits_2024":13213},"checks":{"duplicates":0,"missing_chokepoint_days":0,"route_zero_days":0,"count_mismatch_days":0,"max_volume_gap_t":4.0,"port_coverage":1.0}},"decline":[{"period":"y2019","period_label":"2019 (pre-COVID)","start_date":"2019-01-01","end_date":"2019-12-31","days":365,"transits_per_day":52.463013698630135,"volume_t_per_day":2444843.9205479454,"transits_vs_baseline":-0.28749302339244276,"volume_vs_baseline":-0.2732741835261331,"tonnes_per_transit":46601.28628126796},{"period":"baseline","period_label":"Jan-Oct 2023 (baseline)","start_date":"2023-01-01","end_date":"2023-10-31","days":304,"transits_per_day":73.63157894736842,"volume_t_per_day":3364190.2697368423,"transits_vs_baseline":0.0,"volume_vs_baseline":0.0,"tonnes_per_transit":45689.503305932805},{"period":"crisis_2024","period_label":"2024","start_date":"2024-01-01","end_date":"2024-12-31","days":366,"transits_per_day":39.612021857923494,"volume_t_per_day":1338147.912568306,"transits_vs_baseline":-0.46202400621833717,"volume_vs_baseline":-0.6022377436241202,"tonnes_per_transit":33781.35853221134},{"period":"year_2025","period_label":"2025","start_date":"2025-01-01","end_date":"2025-12-31","days":365,"transits_per_day":38.54794520547945,"volume_t_per_day":1385771.3534246576,"transits_vs_baseline":-0.47647536890342423,"volume_vs_baseline":-0.5880817545040171,"tonnes_per_transit":35949.292395167024},{"period":"latest_2023","period_label":"Same 90 days of 2023","start_date":"2023-07-12","end_date":"2023-10-09","days":90,"transits_per_day":72.86666666666666,"volume_t_per_day":3320704.6,"transits_vs_baseline":-0.010388372647128996,"volume_vs_baseline":-0.012926043490472328,"tonnes_per_transit":45572.34126258006},{"period":"latest","period_label":"Latest 90 days","start_date":"2026-07-12","end_date":"2026-10-09","days":90,"transits_per_day":41.266666666666666,"volume_t_per_day":1531396.9777777777,"transits_vs_baseline":-0.43955206099594957,"volume_vs_baseline":-0.544794778240183,"tonnes_per_transit":37109.78136779752}],"route_periods":[{"chokepoint_name":"Suez","route_role":"Red Sea route (north end)","period":"y2019","period_label":"2019 (pre-COVID)","transits_per_day":52.463013698630135,"volume_t_per_day":2444843.9205479454,"transits_change_per_day":-21.16856524873829,"transits_vs_baseline":-0.28749302339244276,"volume_vs_baseline":-0.2732741835261331},{"chokepoint_name":"Suez","route_role":"Red Sea route (north end)","period":"baseline","period_label":"Jan-Oct 2023 (baseline)","transits_per_day":73.63157894736842,"volume_t_per_day":3364190.2697368423,"transits_change_per_day":0.0,"transits_vs_baseline":0.0,"volume_vs_baseline":0.0},{"chokepoint_name":"Suez","route_role":"Red Sea route (north end)","period":"crisis_2024","period_label":"2024","transits_per_day":39.612021857923494,"volume_t_per_day":1338147.912568306,"transits_change_per_day":-34.01955708944493,"transits_vs_baseline":-0.46202400621833717,"volume_vs_baseline":-0.6022377436241202},{"chokepoint_name":"Suez","route_role":"Red Sea route (north end)","period":"year_2025","period_label":"2025","transits_per_day":38.54794520547945,"volume_t_per_day":1385771.3534246576,"transits_change_per_day":-35.083633741888974,"transits_vs_baseline":-0.47647536890342423,"volume_vs_baseline":-0.5880817545040171},{"chokepoint_name":"Suez","route_role":"Red Sea route (north end)","period":"latest_2023","period_label":"Same 90 days of 2023","transits_per_day":72.86666666666666,"volume_t_per_day":3320704.6,"transits_change_per_day":-0.7649122807017648,"transits_vs_baseline":-0.010388372647128996,"volume_vs_baseline":-0.012926043490472328},{"chokepoint_name":"Suez","route_role":"Red Sea route (north end)","period":"latest","period_label":"Latest 90 days","transits_per_day":41.266666666666666,"volume_t_per_day":1531396.9777777777,"transits_change_per_day":-32.36491228070176,"transits_vs_baseline":-0.43955206099594957,"volume_vs_baseline":-0.544794778240183},{"chokepoint_name":"Bab el-Mandeb","route_role":"Red Sea route (south end)","period":"y2019","period_label":"2019 (pre-COVID)","transits_per_day":53.45479452054794,"volume_t_per_day":2481509.3506849315,"transits_change_per_day":-21.130731795241537,"transits_vs_baseline":-0.283308744189531,"volume_vs_baseline":-0.27389275717779094},{"chokepoint_name":"Bab el-Mandeb","route_role":"Red Sea route (south end)","period":"baseline","period_label":"Jan-Oct 2023 (baseline)","transits_per_day":74.58552631578948,"volume_t_per_day":3417552.125,"transits_change_per_day":0.0,"transits_vs_baseline":0.0,"volume_vs_baseline":0.0},{"chokepoint_name":"Bab el-Mandeb","route_role":"Red Sea route (south end)","period":"crisis_2024","period_label":"2024","transits_per_day":32.51639344262295,"volume_t_per_day":1162580.1530054645,"transits_change_per_day":-42.06913287316653,"transits_vs_baseline":-0.5640388283250695,"volume_vs_baseline":-0.6598207984887825},{"chokepoint_name":"Bab el-Mandeb","route_role":"Red Sea route (south end)","period":"year_2025","period_label":"2025","transits_per_day":33.47397260273973,"volume_t_per_day":1204136.1616438357,"transits_change_per_day":-41.11155371304975,"transits_vs_baseline":-0.5512001556305515,"volume_vs_baseline":-0.6476612155128911},{"chokepoint_name":"Bab el-Mandeb","route_role":"Red Sea route (south end)","period":"latest_2023","period_label":"Same 90 days of 2023","transits_per_day":74.62222222222222,"volume_t_per_day":3344671.2666666666,"transits_change_per_day":0.036695906432740344,"transits_vs_baseline":0.0004919976870227938,"volume_vs_baseline":-0.021325456252794806},{"chokepoint_name":"Bab el-Mandeb","route_role":"Red Sea route (south end)","period":"latest","period_label":"Latest 90 days","transits_per_day":28.844444444444445,"volume_t_per_day":985463.7555555556,"transits_change_per_day":-45.74108187134503,"transits_vs_baseline":-0.6132702164985838,"volume_vs_baseline":-0.711646313059364},{"chokepoint_name":"Cape of Good Hope","route_role":"Diversion route","period":"y2019","period_label":"2019 (pre-COVID)","transits_per_day":48.12876712328767,"volume_t_per_day":2809333.882191781,"transits_change_per_day":-0.7363644556596967,"transits_vs_baseline":-0.015069323091251974,"volume_vs_baseline":-0.07113165466955573},{"chokepoint_name":"Cape of Good Hope","route_role":"Diversion route","period":"baseline","period_label":"Jan-Oct 2023 (baseline)","transits_per_day":48.86513157894737,"volume_t_per_day":3024469.3947368423,"transits_change_per_day":0.0,"transits_vs_baseline":0.0,"volume_vs_baseline":0.0},{"chokepoint_name":"Cape of Good Hope","route_role":"Diversion route","period":"crisis_2024","period_label":"2024","transits_per_day":87.01092896174863,"volume_t_per_day":5231536.060109289,"transits_change_per_day":38.14579738280126,"transits_vs_baseline":0.7806342917786324,"volume_vs_baseline":0.7297368157248234},{"chokepoint_name":"Cape of Good Hope","route_role":"Diversion route","period":"year_2025","period_label":"2025","transits_per_day":89.46027397260274,"volume_t_per_day":5680099.0520547945,"transits_change_per_day":40.595142393655365,"transits_vs_baseline":0.8307588884329338,"volume_vs_baseline":0.8780481171141152},{"chokepoint_name":"Cape of Good Hope","route_role":"Diversion route","period":"latest_2023","period_label":"Same 90 days of 2023","transits_per_day":54.9,"volume_t_per_day":3463267.211111111,"transits_change_per_day":6.034868421052629,"transits_vs_baseline":0.12350050488051156,"volume_vs_baseline":0.14508257783592104},{"chokepoint_name":"Cape of Good Hope","route_role":"Diversion route","period":"latest","period_label":"Latest 90 days","transits_per_day":88.94444444444444,"volume_t_per_day":5517407.777777778,"transits_change_per_day":40.07931286549707,"transits_vs_baseline":0.8202027001757732,"volume_vs_baseline":0.8242564422636007},{"chokepoint_name":"Gibraltar","route_role":"Mediterranean gateway","period":"y2019","period_label":"2019 (pre-COVID)","transits_per_day":115.4,"volume_t_per_day":3068464.183561644,"transits_change_per_day":-30.810526315789474,"transits_vs_baseline":-0.2107271418286537,"volume_vs_baseline":-0.24800816539860493},{"chokepoint_name":"Gibraltar","route_role":"Mediterranean gateway","period":"baseline","period_label":"Jan-Oct 2023 (baseline)","transits_per_day":146.21052631578948,"volume_t_per_day":4080448.8059210526,"transits_change_per_day":0.0,"transits_vs_baseline":0.0,"volume_vs_baseline":0.0},{"chokepoint_name":"Gibraltar","route_role":"Mediterranean gateway","period":"crisis_2024","period_label":"2024","transits_per_day":133.28688524590163,"volume_t_per_day":3539003.1967213117,"transits_change_per_day":-12.92364106988785,"transits_vs_baseline":-0.08839063366733946,"volume_vs_baseline":-0.13269266077154573},{"chokepoint_name":"Gibraltar","route_role":"Mediterranean gateway","period":"year_2025","period_label":"2025","transits_per_day":135.37260273972603,"volume_t_per_day":3540078.7534246575,"transits_change_per_day":-10.837923576063446,"transits_vs_baseline":-0.07412546722289615,"volume_vs_baseline":-0.1324290729275357},{"chokepoint_name":"Gibraltar","route_role":"Mediterranean gateway","period":"latest_2023","period_label":"Same 90 days of 2023","transits_per_day":148.03333333333333,"volume_t_per_day":4063828.6,"transits_change_per_day":1.8228070175438518,"transits_vs_baseline":0.012467002639788838,"volume_vs_baseline":-0.004073131832198262},{"chokepoint_name":"Gibraltar","route_role":"Mediterranean gateway","period":"latest","period_label":"Latest 90 days","transits_per_day":130.72222222222223,"volume_t_per_day":3378333.4,"transits_change_per_day":-15.488304093567251,"transits_vs_baseline":-0.10593152547796181,"volume_vs_baseline":-0.17206818154469383},{"chokepoint_name":"Malacca","route_role":"Upstream control","period":"y2019","period_label":"2019 (pre-COVID)","transits_per_day":170.15342465753426,"volume_t_per_day":6553349.42739726,"transits_change_per_day":-48.83341744772889,"transits_vs_baseline":-0.22299703935753146,"volume_vs_baseline":-0.20262434446920308},{"chokepoint_name":"Malacca","route_role":"Upstream control","period":"baseline","period_label":"Jan-Oct 2023 (baseline)","transits_per_day":218.98684210526315,"volume_t_per_day":8218647.486842105,"transits_change_per_day":0.0,"transits_vs_baseline":0.0,"volume_vs_baseline":0.0},{"chokepoint_name":"Malacca","route_role":"Upstream control","period":"crisis_2024","period_label":"2024","transits_per_day":223.4344262295082,"volume_t_per_day":8499856.950819673,"transits_change_per_day":4.447584124245054,"transits_vs_baseline":0.02030982355600708,"volume_vs_baseline":0.03421602695915338},{"chokepoint_name":"Malacca","route_role":"Upstream control","period":"year_2025","period_label":"2025","transits_per_day":234.48767123287672,"volume_t_per_day":9065112.802739726,"transits_change_per_day":15.50082912761357,"transits_vs_baseline":0.07078429452013646,"volume_vs_baseline":0.10299326224330652},{"chokepoint_name":"Malacca","route_role":"Upstream control","period":"latest_2023","period_label":"Same 90 days of 2023","transits_per_day":221.48888888888888,"volume_t_per_day":8309597.3,"transits_change_per_day":2.5020467836257296,"transits_vs_baseline":0.011425557625160954,"volume_vs_baseline":0.011066274992753256},{"chokepoint_name":"Malacca","route_role":"Upstream control","period":"latest","period_label":"Latest 90 days","transits_per_day":218.75555555555556,"volume_t_per_day":7967674.633333334,"transits_change_per_day":-0.23128654970759044,"transits_vs_baseline":-0.0010561664229872259,"volume_vs_baseline":-0.030537001849826773}],"routes":{"suez":{"name":"Suez","transits":[49.774193548387096,50.57142857142857,49.806451612903224,52.4,51.806451612903224,49.766666666666666,51.806451612903224,55.29032258064516,53.1,56.903225806451616,53.63333333333333,54.483870967741936,57.064516129032256,54.689655172413794,53.903225806451616,57.733333333333334,52.354838709677416,46.63333333333333,47.354838709677416,50.903225806451616,52.233333333333334,53.54838709677419,54.6,52.225806451612904,52.38709677419355,56.25,48.225806451612904,60.36666666666667,56.516129032258064,55.333333333333336,55.645161290322584,62.096774193548384,63.06666666666667,61.193548387096776,63.0,58.74193548387097,59.0,62.857142857142854,60.354838709677416,64.76666666666667,63.903225806451616,67.73333333333333,71.03225806451613,71.41935483870968,69.36666666666666,70.80645161290323,71.5,72.41935483870968,70.96774193548387,70.07142857142857,71.7741935483871,77.3,77.41935483870968,75.26666666666667,71.35483870967742,71.54838709677419,74.23333333333333,76.2258064516129,76.56666666666666,71.41935483870968,48.03225806451613,42.37931034482759,38.87096774193548,40.86666666666667,40.70967741935484,38.96666666666667,38.483870967741936,40.32258064516129,37.43333333333333,37.54838709677419,36.0,35.74193548387097,37.12903225806452,34.142857142857146,37.29032258064516,37.03333333333333,37.0,36.666666666666664,38.0,38.645161290322584,42.06666666666667,41.32258064516129,42.93333333333333,40.064516129032256,39.064516129032256,41.357142857142854,41.0,42.13333333333333,39.096774193548384,40.4,41.87096774193548,41.0,40.4],"volume":[2264209.580645161,2424416.8928571427,2361364.9032258065,2526576.7333333334,2449711.1612903224,2422851.2,2441477.5483870967,2550193.7419354836,2452942.533333333,2569131.709677419,2448614.2333333334,2426969.9677419355,2498429.193548387,2544806.206896552,2481733.1612903224,2676785.7,2502765.2258064514,2113769.6666666665,2174599.6129032257,2300729.7741935486,2368172.566666667,2354950.870967742,2479078.6666666665,2428050.64516129,2324462.7419354836,2570424.1071428573,2180116.870967742,2941604.966666667,2657781.193548387,2634720.7,2564351.5161290322,2724132.9032258065,2885269.1666666665,2781607.9677419355,2797919.466666667,2762413.8387096776,2558812.4838709678,2774368.035714286,2549634.2258064514,2820171.1,2843716.5161290322,3041542.2666666666,3070257.0,3212370.35483871,3038134.533333333,3101969.193548387,3139365.1333333333,3250499.4838709678,3162974.6774193547,3140837.25,3398675.709677419,3564831.1666666665,3538943.064516129,3473743.1,3205597.4516129033,3247586.3225806453,3448615.9,3451212.9032258065,3517851.8,3066658.064516129,1852113.0322580645,1592004.0344827587,1357343.7096774194,1387666.0666666667,1349518.8709677418,1334870.9666666666,1215552.7096774194,1253226.1935483871,1222277.2666666666,1177373.3548387096,1131965.8333333333,1191343.5806451612,1243454.9677419355,1178441.7142857143,1391628.7096774194,1309005.9666666666,1338085.3548387096,1229213.0666666667,1385951.5483870967,1364986.2580645161,1510957.2,1514232.6451612904,1579841.0,1566165.6451612904,1350362.4838709678,1465039.5,1432673.322580645,1420023.3,1499578.8387096773,1586797.5666666667,1599604.7096774194,1384077.1290322582,1565088.0666666667]},"bab":{"name":"Bab el-Mandeb","transits":[51.87096774193548,53.17857142857143,52.225806451612904,55.266666666666666,51.96774193548387,51.2,53.58064516129032,54.61290322580645,53.96666666666667,54.935483870967744,54.233333333333334,54.41935483870968,57.29032258064516,54.827586206896555,53.645161290322584,56.9,53.61290322580645,48.56666666666667,52.96774193548387,53.83870967741935,55.5,54.87096774193548,56.166666666666664,55.483870967741936,57.645161290322584,58.82142857142857,53.806451612903224,59.166666666666664,56.193548387096776,58.63333333333333,58.645161290322584,60.225806451612904,61.3,58.935483870967744,62.0,60.70967741935484,61.12903225806452,63.214285714285715,61.806451612903224,64.3,64.06451612903226,66.6,68.25806451612904,69.93548387096774,70.6,70.6774193548387,73.26666666666667,71.29032258064517,71.58064516129032,70.53571428571429,73.38709677419355,74.76666666666667,77.58064516129032,76.53333333333333,74.09677419354838,73.0,75.43333333333334,78.64516129032258,77.33333333333333,65.19354838709677,39.41935483870968,34.93103448275862,32.61290322580645,32.4,32.03225806451613,31.366666666666667,28.903225806451612,31.29032258064516,30.566666666666666,31.548387096774192,33.2,32.0,32.225806451612904,32.0,32.935483870967744,32.833333333333336,33.12903225806452,31.733333333333334,31.225806451612904,35.03225806451613,33.93333333333333,36.096774193548384,37.766666666666666,32.70967741935484,33.516129032258064,36.785714285714285,35.54838709677419,36.733333333333334,36.096774193548384,36.63333333333333,33.645161290322584,27.35483870967742,26.566666666666666],"volume":[2335753.6129032257,2473409.0714285714,2349220.64516129,2609195.4,2481147.64516129,2457534.066666667,2451259.7419354836,2546768.7741935486,2473887.7666666666,2569174.6129032257,2553732.2333333334,2481674.1612903224,2510184.0,2466917.5172413792,2567808.5483870967,2674407.8,2580776.5483870967,2213405.8333333335,2338574.870967742,2393249.0967741935,2444305.466666667,2390716.0967741935,2461047.7333333334,2495565.6129032257,2475272.8387096776,2560938.6428571427,2425895.0322580645,2865092.2666666666,2662265.419354839,2770224.8666666667,2678332.129032258,2663938.806451613,2858837.3666666667,2698385.64516129,2702248.1,2826878.3225806453,2652370.6129032257,2869233.3571428573,2735775.0,2854320.966666667,2945668.129032258,3064925.6666666665,3158097.0322580645,3208151.580645161,3163785.3,3147216.806451613,3291679.1666666665,3245905.4838709678,3216156.064516129,3187027.964285714,3424847.6774193547,3560433.566666667,3626995.9032258065,3608038.1,3317173.7741935486,3282998.806451613,3399084.2333333334,3540614.419354839,3476777.5,2786423.5161290322,1618372.7741935484,1386678.4827586208,1265881.9032258065,1169192.5,1164471.5806451612,1151024.9666666666,1026693.4516129033,1036447.0,1042147.4,1017105.5806451613,1027120.9333333333,1051869.1935483871,1068125.2580645161,1069277.2857142857,1236703.9677419355,1223147.5,1160093.7096774194,1116339.9666666666,1127986.8064516129,1191307.1935483871,1244416.4666666666,1360731.3870967743,1407408.8333333333,1236682.3870967743,1168828.4193548388,1332144.857142857,1315463.0322580645,1399614.6666666667,1353751.322580645,1414713.6,1297704.1935483871,864268.7096774194,937682.0666666667]},"cape":{"name":"Cape of Good Hope","transits":[47.516129032258064,49.892857142857146,44.29032258064516,45.96666666666667,46.16129032258065,50.36666666666667,50.516129032258064,51.16129032258065,52.36666666666667,51.096774193548384,47.06666666666667,41.41935483870968,65.87096774193549,51.86206896551724,44.193548387096776,50.766666666666666,55.61290322580645,52.166666666666664,61.41935483870968,55.225806451612904,54.733333333333334,49.70967741935484,48.36666666666667,42.935483870967744,42.806451612903224,46.67857142857143,48.32258064516129,52.2,49.935483870967744,50.3,51.41935483870968,46.225806451612904,49.46666666666667,41.806451612903224,41.53333333333333,42.67741935483871,41.45161290322581,42.357142857142854,40.54838709677419,41.43333333333333,45.225806451612904,47.8,47.0,47.193548387096776,47.36666666666667,42.87096774193548,41.7,40.38709677419355,42.29032258064516,41.964285714285715,43.16129032258065,45.13333333333333,49.16129032258065,51.56666666666667,52.25806451612903,56.516129032258064,55.766666666666666,50.354838709677416,49.266666666666666,51.38709677419355,72.19354838709677,85.75862068965517,85.93548387096774,87.66666666666667,91.58064516129032,95.5,91.74193548387096,93.6774193548387,86.5,88.96774193548387,83.66666666666667,81.03225806451613,84.38709677419355,87.89285714285714,80.70967741935483,84.13333333333334,89.41935483870968,91.86666666666666,96.41935483870968,98.12903225806451,94.43333333333334,94.06451612903226,87.16666666666667,84.74193548387096,87.70967741935483,87.03571428571429,91.25806451612904,92.8,96.93548387096774,92.8,91.54838709677419,90.3225806451613,86.13333333333334],"volume":[2506421.3225806453,2505679.3214285714,2474848.6129032257,2537232.2666666666,2712782.3870967743,3213574.3333333335,3269038.5483870967,3131439.64516129,3149861.1333333333,2933734.1612903224,2792626.5,2470090.7741935486,2022975.8387096773,2240044.9310344825,2274814.129032258,3008382.9,3355896.6129032257,3262505.0,3704932.709677419,3403511.0,3372374.533333333,3060272.6774193547,2739534.2333333334,2534321.0322580645,2571052.5483870967,2610367.5714285714,2517273.9677419355,3000951.033333333,3011250.870967742,3142653.466666667,3334177.419354839,3095108.1612903224,3110391.5,2862097.9677419355,2445742.1666666665,2494333.64516129,2374171.4516129033,2315630.0714285714,2426202.1612903224,2556862.1666666665,2909803.5161290322,2889714.966666667,3010126.419354839,3069828.870967742,3349565.5,2876423.2258064514,2628484.8666666667,2390761.580645161,2454598.2258064514,2266406.285714286,2496425.5483870967,2811636.9,3219488.290322581,3335573.3,3412142.709677419,3472837.2580645164,3574422.066666667,3148712.870967742,3005547.1,3084672.7741935486,3991942.0967741935,4464545.586206896,5136779.9677419355,5259744.866666666,5387079.935483871,5792907.1,5835518.161290322,5618309.483870967,5533310.066666666,5618925.387096774,5013337.1,5098264.387096774,4989355.580645162,5052670.535714285,5080170.774193549,5507057.066666666,5796228.129032258,5978611.366666666,6171618.9677419355,6310982.516129033,6163491.366666666,6094766.451612903,5601058.933333334,5371549.096774193,5162579.354838709,5050476.607142857,5179670.806451613,5641526.2,6206155.483870967,5941931.8,5758802.935483871,5390920.29032258,5495838.533333333]},"gib":{"name":"Gibraltar","transits":[103.38709677419355,108.42857142857143,108.7741935483871,111.73333333333333,114.25806451612904,116.86666666666666,112.2258064516129,113.7741935483871,116.86666666666666,124.38709677419355,124.6,129.09677419354838,125.54838709677419,127.17241379310344,127.38709677419355,124.8,122.12903225806451,121.3,118.38709677419355,120.64516129032258,121.2,120.0,125.36666666666666,121.51612903225806,124.19354838709677,125.35714285714286,131.67741935483872,130.03333333333333,132.09677419354838,132.36666666666667,125.96774193548387,130.51612903225808,130.03333333333333,128.93548387096774,119.36666666666666,120.61290322580645,132.4516129032258,128.46428571428572,137.03225806451613,141.46666666666667,144.2258064516129,141.26666666666668,141.41935483870967,142.96774193548387,140.53333333333333,143.5483870967742,140.7,140.80645161290323,139.5483870967742,145.71428571428572,145.06451612903226,147.26666666666668,148.80645161290323,148.8,144.8709677419355,147.80645161290323,148.16666666666666,146.19354838709677,147.26666666666668,146.83870967741936,137.09677419354838,131.44827586206895,136.6451612903226,139.23333333333332,136.96774193548387,134.33333333333334,131.83870967741936,133.74193548387098,129.03333333333333,129.0,128.76666666666668,131.16129032258064,125.3225806451613,138.92857142857142,137.06451612903226,135.73333333333332,136.90322580645162,134.33333333333334,136.3548387096774,132.51612903225808,137.4,134.96774193548387,136.7,138.67741935483872,123.12903225806451,141.25,136.83870967741936,131.53333333333333,135.25806451612902,132.7,127.93548387096774,128.61290322580646,133.13333333333333],"volume":[2748984.709677419,2925541.8928571427,3019979.5161290322,2963719.5,3085431.9677419355,3049091.3333333335,3025401.64516129,3109940.6129032257,3029543.6,3255197.64516129,3409064.8333333335,3191569.580645161,3214221.2258064514,3364907.9655172415,3338253.129032258,3470613.8333333335,3216394.35483871,3098223.566666667,3009272.129032258,3081261.806451613,3092661.7666666666,3032534.290322581,3180866.533333333,3137745.8387096776,3198725.4516129033,3244825.785714286,3384956.6129032257,3410735.5,3466486.935483871,3527518.533333333,3365645.580645161,3474913.5161290322,3404891.1666666665,3445065.5483870967,3302105.466666667,3401197.5483870967,3429455.419354839,3413364.5714285714,3731380.2580645164,3942149.8333333335,3952357.3225806453,3915088.0,3938669.5483870967,4055572.4838709678,3911898.6333333333,4055941.6774193547,3875608.0,3968740.870967742,3976452.290322581,4087696.0714285714,4153231.35483871,4206696.133333334,4139450.806451613,4054607.2333333334,3893237.3225806453,4008780.1612903224,4233857.8,4059367.806451613,4239564.8,4222338.193548387,3693307.064516129,3597105.793103448,3777535.6774193547,3758638.1666666665,3644225.5161290322,3639047.8,3371489.35483871,3500172.6129032257,3325690.3333333335,3378238.2580645164,3327342.5,3455597.2580645164,3336721.0322580645,3679285.0714285714,3690794.3870967743,3550206.0,3501767.806451613,3485315.8333333335,3458517.6774193547,3508309.870967742,3462219.4,3520012.7419354836,3688881.7666666666,3613233.6774193547,3188457.2258064514,3811338.5,3682200.9677419355,3320157.3333333335,3696019.935483871,3611926.6,3366433.0967741935,3323071.580645161,3477584.5]},"mal":{"name":"Malacca","transits":[170.80645161290323,173.75,166.80645161290323,174.2,168.93548387096774,163.5,167.19354838709677,165.96774193548387,172.86666666666667,171.48387096774192,173.6,173.19354838709677,181.19354838709677,161.86206896551724,161.38709677419354,154.96666666666667,155.19354838709677,157.46666666666667,162.7741935483871,157.74193548387098,159.26666666666668,157.74193548387098,163.23333333333332,161.03225806451613,166.5483870967742,164.5,157.70967741935485,166.86666666666667,158.1290322580645,145.3,141.1290322580645,150.38709677419354,144.26666666666668,147.1290322580645,192.33333333333334,201.51612903225808,207.6451612903226,203.42857142857142,202.16129032258064,204.46666666666667,198.8709677419355,206.73333333333332,204.74193548387098,211.51612903225808,209.8,215.38709677419354,212.36666666666667,208.06451612903226,212.51612903225808,207.42857142857142,217.61290322580646,221.13333333333333,221.58064516129033,218.56666666666666,225.7741935483871,222.06451612903226,219.7,222.4516129032258,226.8,224.93548387096774,224.51612903225808,221.3793103448276,219.1290322580645,221.93333333333334,224.48387096774192,222.33333333333334,226.3548387096774,224.90322580645162,221.16666666666666,227.03225806451613,220.4,227.19354838709677,228.06451612903226,221.5,225.70967741935485,231.5,236.06451612903226,232.8,236.83870967741936,237.38709677419354,241.13333333333333,242.19354838709677,237.76666666666668,241.80645161290323,243.93548387096774,238.46428571428572,220.51612903225808,221.23333333333332,217.7741935483871,221.36666666666667,224.93548387096774,211.5483870967742,219.33333333333334],"volume":[6679728.0322580645,6619664.785714285,6474564.096774193,6872306.033333333,6383253.838709678,6079113.466666667,6357494.161290322,6398373.548387097,6688255.066666666,6786692.161290322,6730635.366666666,6581591.870967742,6662859.258064516,6011712.172413793,6313698.129032258,6243027.333333333,6444538.870967742,6214430.566666666,6648779.354838709,6400022.129032258,6301642.966666667,6243754.870967742,6320811.4,6108906.741935484,6302840.612903226,6182713.821428572,6107543.903225807,6600222.033333333,6382048.870967742,5737092.166666667,5796420.129032258,6022232.516129033,5806023.466666667,5920489.806451613,7128700.533333333,7312858.806451613,7495174.0322580645,7135605.142857143,7486755.0322580645,7390219.633333334,7451270.0322580645,7685481.166666667,7464422.580645162,7566161.161290322,7579796.233333333,7754397.0,7917721.766666667,7817547.580645162,7687757.548387097,7590959.928571428,8025291.806451613,8578988.166666666,8471604.096774194,8204546.6,8309396.870967742,8408572.838709677,8244440.3,8616173.806451613,8777133.3,8867611.903225806,8576696.967741935,8261843.586206896,8525881.870967742,8575471.366666667,8609478.096774194,8305783.266666667,8626668.225806452,8515497.483870968,8318598.0,8776043.677419355,8200957.633333334,8670697.290322581,8342432.9677419355,8396021.5,8646836.709677419,9180674.466666667,9210759.612903226,8952249.233333332,9145461.967741935,9057159.903225806,9247021.566666666,9511144.290322581,9491805.733333332,9554754.258064516,9373807.677419355,8971601.357142856,7859970.064516129,7914268.5,7862002.548387097,8180206.1,8559919.741935484,7360676.193548387,8133142.366666666]}},"vessel":[{"vessel_type":"container","vessel_label":"Container","baseline_transits":19.55592105263158,"crisis_2024_transits":8.737704918032787,"latest_transits":10.244444444444444,"transits_change_2024":-0.5531938948558508,"transits_change_latest":-0.476146154564994,"baseline_volume_t":1052884.3092105263,"crisis_2024_volume_t":197230.78961748633,"latest_volume_t":391785.73333333334,"volume_change_2024":-0.8126757252509785,"volume_change_latest":-0.6278928939238329,"baseline_share":0.2655914939242316,"latest_share":0.24824986537425955,"share_of_lost_transits_2024":0.3179999112320985,"share_of_lost_volume_2024":0.4223275572524778},{"vessel_type":"dry_bulk","vessel_label":"Dry bulk","baseline_transits":19.299342105263158,"crisis_2024_transits":11.704918032786885,"latest_transits":9.977777777777778,"transits_change_2024":-0.39350688904598374,"transits_change_latest":-0.482999072022423,"baseline_volume_t":1017203.4572368421,"crisis_2024_volume_t":502503.868852459,"latest_volume_t":422971.0333333333,"volume_change_2024":-0.5059947296900922,"volume_change_latest":-0.5841824658340202,"baseline_share":0.2621068620443173,"latest_share":0.2417878298330641,"share_of_lost_transits_2024":0.22323700607003363,"share_of_lost_volume_2024":0.25404186963973124},{"vessel_type":"tanker","vessel_label":"Tanker","baseline_transits":25.595394736842106,"crisis_2024_transits":14.346994535519126,"latest_transits":15.955555555555556,"transits_change_2024":-0.4394696904256761,"transits_change_latest":-0.3766239700695426,"baseline_volume_t":1253205.4276315789,"crisis_2024_volume_t":617390.2459016393,"latest_volume_t":690830.0,"volume_change_2024":-0.5073511235357164,"volume_change_latest":-0.4487495946250464,"baseline_share":0.3476143674052895,"latest_share":0.38664512654819605,"share_of_lost_transits_2024":0.33064511015673875,"share_of_lost_volume_2024":0.3138212680896332},{"vessel_type":"general_cargo","vessel_label":"General cargo","baseline_transits":6.006578947368421,"crisis_2024_transits":4.262295081967213,"latest_transits":3.7555555555555555,"transits_change_2024":-0.290395561381143,"transits_change_latest":-0.3747596446391628,"baseline_volume_t":27375.154605263157,"crisis_2024_volume_t":19953.90163934426,"latest_volume_t":22643.0,"volume_change_2024":-0.27109446769999546,"volume_change_latest":-0.17286311889370487,"baseline_share":0.08157612580414582,"latest_share":0.09100700053850297,"share_of_lost_transits_2024":0.05127297397832372,"share_of_lost_volume_2024":0.0036629308067825154},{"vessel_type":"roro","vessel_label":"Ro-ro","baseline_transits":3.174342105263158,"crisis_2024_transits":0.5601092896174863,"latest_transits":1.3333333333333333,"transits_change_2024":-0.8235510631671339,"transits_change_latest":-0.579965457685665,"baseline_volume_t":13521.921052631578,"crisis_2024_volume_t":1069.1065573770493,"latest_volume_t":3167.211111111111,"volume_change_2024":-0.9209353054779902,"volume_change_latest":-0.7657721045121231,"baseline_share":0.04311115082201573,"latest_share":0.03231017770597738,"share_of_lost_transits_2024":0.07684499856280541,"share_of_lost_volume_2024":0.006146374211375209}],"annual":[{"year":2019,"days":365,"is_partial_year":false,"transits":19149.0,"volume_t":892368031.0,"transits_per_day":52.463013698630135,"transit_index_2023":0.7119910764082543,"volume_index_2023":0.7294666135415454,"revenue_proxy_usd_annualised":7477032788.80084,"sca_to_portwatch_transits_2023":0.9828592675218442},{"year":2020,"days":366,"is_partial_year":false,"transits":19310.0,"volume_t":881912591.0,"transits_per_day":52.759562841530055,"transit_index_2023":0.7160156325398205,"volume_index_2023":0.7189500835619314,"revenue_proxy_usd_annualised":7369238356.509797,"sca_to_portwatch_transits_2023":0.9828592675218442},{"year":2021,"days":365,"is_partial_year":false,"transits":21067.0,"volume_t":967598182.0,"transits_per_day":57.71780821917808,"transit_index_2023":0.7833054471091282,"volume_index_2023":0.7909635313823741,"revenue_proxy_usd_annualised":8107376196.669334,"sca_to_portwatch_transits_2023":0.9828592675218442},{"year":2022,"days":365,"is_partial_year":false,"transits":24498.0,"volume_t":1077063733.0,"transits_per_day":67.11780821917809,"transit_index_2023":0.9108756274400448,"volume_index_2023":0.8804461910177116,"revenue_proxy_usd_annualised":9024573457.931543,"sca_to_portwatch_transits_2023":0.9828592675218442},{"year":2023,"days":365,"is_partial_year":false,"transits":26895.0,"volume_t":1223315796.0,"transits_per_day":73.68493150684931,"transit_index_2023":1.0,"volume_index_2023":1.0,"revenue_proxy_usd_annualised":10250000000.0,"sca_to_portwatch_transits_2023":0.9828592675218442},{"year":2024,"days":366,"is_partial_year":false,"transits":14498.0,"volume_t":489762136.0,"transits_per_day":39.612021857923494,"transit_index_2023":0.5375864650731391,"volume_index_2023":0.39926238971529776,"revenue_proxy_usd_annualised":4092439494.5818024,"sca_to_portwatch_transits_2023":0.9828592675218442},{"year":2025,"days":365,"is_partial_year":false,"transits":14070.0,"volume_t":505806544.0,"transits_per_day":38.54794520547945,"transit_index_2023":0.5231455660903513,"volume_index_2023":0.4134717671870886,"revenue_proxy_usd_annualised":4238085613.6676583,"sca_to_portwatch_transits_2023":0.9828592675218442},{"year":2026,"days":284,"is_partial_year":true,"transits":11590.0,"volume_t":423458071.0,"transits_per_day":40.809859154929576,"transit_index_2023":0.5538426693269863,"volume_index_2023":0.44488355826621445,"revenue_proxy_usd_annualised":4560056472.228698,"sca_to_portwatch_transits_2023":0.9828592675218442}],"lost":[{"year":2023,"days":43,"actual_transits":3104.0,"expected_transits":3166.1578947368394,"lost_transits":62.157894736842266,"actual_volume_t":135966827.0,"expected_volume_t":144660181.59868425,"lost_volume_t":8693354.598684218,"lost_transit_share":0.01963196303007138,"lost_volume_share":0.0600950068125954,"cumulative_lost_transits":62.157894736842266,"cumulative_lost_volume_t":8693354.598684218},{"year":2024,"days":366,"actual_transits":14498.0,"expected_transits":26945.597744361043,"lost_transits":12447.597744360924,"actual_volume_t":489762136.0,"expected_volume_t":1231070285.703947,"lost_volume_t":741308149.7039481,"lost_transit_share":0.46195292687340206,"lost_volume_share":0.6021655776380432,"cumulative_lost_transits":12509.755639097766,"cumulative_lost_volume_t":750001504.3026323},{"year":2025,"days":365,"actual_transits":14070.0,"expected_transits":26875.526315789615,"lost_transits":12805.526315789495,"actual_volume_t":505806544.0,"expected_volume_t":1227929448.4539473,"lost_volume_t":722122904.4539484,"lost_transit_share":0.47647536890342246,"lost_volume_share":0.5880817545040179,"cumulative_lost_transits":25315.28195488726,"cumulative_lost_volume_t":1472124408.7565808},{"year":2026,"days":284,"actual_transits":11590.0,"expected_transits":20859.483870967764,"lost_transits":9269.483870967757,"actual_volume_t":423458071.0,"expected_volume_t":953689583.9354872,"lost_volume_t":530231512.93548256,"lost_transit_share":0.44437743178626904,"lost_volume_share":0.5559791381462235,"cumulative_lost_transits":34584.76582585502,"cumulative_lost_volume_t":2002355921.6920633}],"ports":[{"port_name":"Alexandria","coast":"Mediterranean","baseline_calls":9.50328947368421,"crisis_2024_calls":10.51639344262295,"latest_calls":8.311111111111112,"calls_change_2024":0.10660560974640942,"calls_change_latest":-0.1254490211914926,"baseline_container_calls":2.786184210526316,"latest_container_calls":3.3555555555555556,"container_calls_change_latest":0.20435524071887712,"baseline_trade_t":105736.25328947368,"latest_trade_t":135369.77777777778,"trade_t_change_latest":0.28025888535294063},{"port_name":"Damietta","coast":"Mediterranean","baseline_calls":7.282894736842105,"crisis_2024_calls":7.14207650273224,"latest_calls":7.088888888888889,"calls_change_2024":-0.0193354756862687,"calls_change_latest":-0.026638562681923217,"baseline_container_calls":2.463815789473684,"latest_container_calls":2.966666666666667,"container_calls_change_latest":0.20409434801958182,"baseline_trade_t":82151.33552631579,"latest_trade_t":73425.2,"trade_t_change_latest":-0.10622025156877113},{"port_name":"El Dekheila","coast":"Mediterranean","baseline_calls":4.6480263157894735,"crisis_2024_calls":5.226775956284153,"latest_calls":4.611111111111111,"calls_change_2024":0.12451513850699403,"calls_change_latest":-0.007942124714948484,"baseline_container_calls":2.1447368421052633,"latest_container_calls":1.6222222222222222,"container_calls_change_latest":-0.24362644853442406,"baseline_trade_t":69330.75328947368,"latest_trade_t":77407.78888888888,"trade_t_change_latest":0.1165000409802488},{"port_name":"Port Said","coast":"Mediterranean","baseline_calls":2.2565789473684212,"crisis_2024_calls":2.1748633879781423,"latest_calls":1.988888888888889,"calls_change_2024":-0.036212142936799974,"calls_change_latest":-0.11862649821833504,"baseline_container_calls":1.2598684210526316,"latest_container_calls":1.0444444444444445,"container_calls_change_latest":-0.17098926602843045,"baseline_trade_t":10480.296052631578,"latest_trade_t":9923.944444444445,"trade_t_change_latest":-0.053085485886387174},{"port_name":"El Sokhna","coast":"Gulf of Suez","baseline_calls":1.6842105263157894,"crisis_2024_calls":2.33879781420765,"latest_calls":4.511111111111111,"calls_change_2024":0.3886612021857925,"calls_change_latest":1.6784722222222221,"baseline_container_calls":0.7993421052631579,"latest_container_calls":1.8555555555555556,"container_calls_change_latest":1.3213534522176498,"baseline_trade_t":62955.65460526316,"latest_trade_t":158341.48888888888,"trade_t_change_latest":1.5151273524467705},{"port_name":"Sidi Kerir","coast":"Mediterranean","baseline_calls":1.1710526315789473,"crisis_2024_calls":1.0792349726775956,"latest_calls":1.8444444444444446,"calls_change_2024":-0.07840609074722171,"calls_change_latest":0.5750312109862672,"baseline_container_calls":0.0,"latest_container_calls":0.03333333333333333,"container_calls_change_latest":null,"baseline_trade_t":80068.25328947368,"latest_trade_t":167891.92222222223,"trade_t_change_latest":1.0968600578213743},{"port_name":"Al Adabiyah","coast":"Gulf of Suez","baseline_calls":1.167763157894737,"crisis_2024_calls":1.1885245901639345,"latest_calls":0.9,"calls_change_2024":0.017778803971369106,"calls_change_latest":-0.22929577464788742,"baseline_container_calls":0.10197368421052631,"latest_container_calls":0.18888888888888888,"container_calls_change_latest":0.8523297491039425,"baseline_trade_t":11809.358552631578,"latest_trade_t":10743.133333333333,"trade_t_change_latest":-0.09028646344730118},{"port_name":"As Suways","coast":"Gulf of Suez","baseline_calls":0.5394736842105263,"crisis_2024_calls":0.453551912568306,"latest_calls":0.3111111111111111,"calls_change_2024":-0.15926962548314005,"calls_change_latest":-0.4233062330623306,"baseline_container_calls":0.003289473684210526,"latest_container_calls":0.0,"container_calls_change_latest":-1.0,"baseline_trade_t":741.0526315789474,"latest_trade_t":426.68888888888887,"trade_t_change_latest":-0.4242124368686869},{"port_name":"Safaga","coast":"Red Sea","baseline_calls":0.4901315789473684,"crisis_2024_calls":0.6256830601092896,"latest_calls":0.8888888888888888,"calls_change_2024":0.2765614112296917,"calls_change_latest":0.8135719612229679,"baseline_container_calls":0.0,"latest_container_calls":0.43333333333333335,"container_calls_change_latest":null,"baseline_trade_t":9274.082236842105,"latest_trade_t":9844.033333333333,"trade_t_change_latest":0.06145633410786977}],"coast":{"Gulf of Suez":{"calls":[3.6129032258064515,3.392857142857143,3.5161290322580645,3.466666666666667,3.7096774193548385,3.2,3.5161290322580645,3.6774193548387095,3.3,3.3548387096774195,3.1333333333333333,3.4516129032258065,3.064516129032258,3.413793103448276,3.4516129032258065,4.066666666666666,3.3870967741935485,3.1333333333333333,3.4516129032258065,3.4838709677419355,3.6666666666666665,3.096774193548387,3.3333333333333335,3.870967741935484,2.935483870967742,3.25,3.4193548387096775,3.3666666666666667,3.3225806451612905,3.2,3.0,2.838709677419355,2.8666666666666667,2.903225806451613,3.1333333333333333,2.870967741935484,3.032258064516129,3.4642857142857144,3.5806451612903225,3.6333333333333333,3.096774193548387,3.2666666666666666,2.6129032258064515,3.3548387096774195,2.933333333333333,3.0,2.8333333333333335,3.2580645161290325,3.129032258064516,3.0,3.3870967741935485,3.4,3.4838709677419355,3.1,4.0,3.838709677419355,3.433333333333333,3.161290322580645,3.3666666666666667,3.2580645161290325,3.129032258064516,3.8620689655172415,3.4516129032258065,3.3333333333333335,3.806451612903226,4.033333333333333,4.387096774193548,4.064516129032258,4.566666666666666,4.67741935483871,4.033333333333333,4.580645161290323,4.32258064516129,4.0,3.5161290322580645,3.8333333333333335,4.67741935483871,4.366666666666666,4.903225806451613,4.580645161290323,4.766666666666667,4.129032258064516,4.2,3.6774193548387095,4.064516129032258,4.357142857142857,3.7419354838709675,4.033333333333333,5.032258064516129,4.9,6.161290322580645,5.806451612903226,5.766666666666667],"box":[0.7096774193548387,0.7857142857142857,0.6451612903225806,0.6333333333333333,0.8709677419354839,0.6666666666666666,0.6129032258064516,0.7419354838709677,0.7333333333333333,0.7419354838709677,0.6333333333333333,0.7419354838709677,0.6451612903225806,0.8275862068965517,0.5483870967741935,0.8,0.8064516129032258,0.6666666666666666,0.8064516129032258,0.6774193548387096,0.7666666666666667,0.5483870967741935,0.5666666666666667,0.5806451612903226,0.6774193548387096,0.75,0.6451612903225806,0.6,0.6774193548387096,0.7333333333333333,0.6451612903225806,0.7419354838709677,0.6,0.6774193548387096,0.6,0.6451612903225806,0.7096774193548387,0.8571428571428571,0.7096774193548387,0.6666666666666666,0.4838709677419355,0.6,0.6774193548387096,0.6774193548387096,0.7333333333333333,0.5806451612903226,0.4666666666666667,0.6129032258064516,0.7096774193548387,0.6428571428571429,0.8387096774193549,0.8333333333333334,0.9032258064516129,0.9666666666666667,0.9354838709677419,1.096774193548387,1.0333333333333334,1.064516129032258,0.9333333333333333,0.7419354838709677,0.5483870967741935,1.1379310344827587,1.0,1.4,1.2903225806451613,1.5,1.4193548387096775,1.4516129032258065,1.4666666666666666,1.5806451612903225,1.6666666666666667,1.5483870967741935,1.7419354838709677,1.4642857142857142,1.5161290322580645,1.2,1.3870967741935485,1.2666666666666666,1.4516129032258065,1.3870967741935485,1.2333333333333334,1.2580645161290323,1.3,0.7096774193548387,0.967741935483871,1.0714285714285714,0.9354838709677419,0.9,1.3548387096774193,0.9,2.032258064516129,2.161290322580645,2.066666666666667]},"Mediterranean":{"calls":[19.322580645161292,21.678571428571427,22.677419354838708,25.2,22.903225806451612,22.9,22.161290322580644,20.806451612903224,22.1,22.870967741935484,20.966666666666665,17.516129032258064,17.129032258064516,18.448275862068964,20.64516129032258,20.6,18.161290322580644,21.366666666666667,17.612903225806452,20.29032258064516,19.366666666666667,18.322580645161292,17.233333333333334,17.387096774193548,17.161290322580644,21.428571428571427,21.096774193548388,20.866666666666667,22.129032258064516,21.633333333333333,19.35483870967742,20.419354838709676,20.5,19.838709677419356,19.6,18.870967741935484,19.096774193548388,22.107142857142858,21.806451612903224,21.633333333333333,21.225806451612904,22.866666666666667,20.64516129032258,22.258064516129032,22.766666666666666,21.548387096774192,20.433333333333334,20.774193548387096,19.93548387096774,20.607142857142858,22.548387096774192,23.166666666666668,28.0,27.633333333333333,26.967741935483872,26.774193548387096,28.566666666666666,24.612903225806452,24.1,24.06451612903226,21.451612903225808,27.551724137931036,25.806451612903224,27.833333333333332,29.322580645161292,28.6,26.387096774193548,27.129032258064516,25.633333333333333,26.0,25.133333333333333,23.096774193548388,25.548387096774192,23.607142857142858,26.161290322580644,25.4,26.387096774193548,28.5,27.612903225806452,27.838709677419356,28.033333333333335,29.06451612903226,26.8,24.193548387096776,23.903225806451612,24.035714285714285,24.741935483870968,27.5,24.451612903225808,24.733333333333334,23.29032258064516,24.387096774193548,23.9],"box":[5.67741935483871,6.464285714285714,6.774193548387097,7.866666666666666,8.0,7.833333333333333,7.161290322580645,7.709677419354839,6.733333333333333,7.064516129032258,6.866666666666666,5.935483870967742,5.612903225806452,6.758620689655173,7.419354838709677,7.233333333333333,6.967741935483871,7.966666666666667,7.129032258064516,7.516129032258065,7.0,6.387096774193548,6.366666666666666,5.935483870967742,6.129032258064516,7.035714285714286,6.741935483870968,7.466666666666667,8.419354838709678,7.733333333333333,7.064516129032258,6.806451612903226,6.666666666666667,6.032258064516129,6.433333333333334,6.064516129032258,5.741935483870968,6.821428571428571,6.741935483870968,6.833333333333333,8.451612903225806,8.7,8.451612903225806,7.870967741935484,8.4,7.774193548387097,7.366666666666666,7.451612903225806,7.032258064516129,7.642857142857143,8.0,8.266666666666667,9.225806451612904,9.4,9.32258064516129,9.35483870967742,9.4,8.838709677419354,8.8,8.451612903225806,7.870967741935484,8.827586206896552,9.225806451612904,9.866666666666667,10.64516129032258,10.6,9.064516129032258,8.709677419354838,8.5,8.161290322580646,8.2,8.064516129032258,8.35483870967742,7.928571428571429,9.64516129032258,8.333333333333334,9.516129032258064,10.233333333333333,9.806451612903226,9.870967741935484,9.966666666666667,9.935483870967742,9.8,8.806451612903226,9.064516129032258,8.75,8.709677419354838,9.233333333333333,8.774193548387096,8.933333333333334,8.709677419354838,8.483870967741936,9.0]},"Red Sea":{"calls":[1.0,1.1071428571428572,1.1290322580645162,0.9666666666666667,1.032258064516129,0.8,0.7741935483870968,0.5806451612903226,0.6,0.6451612903225806,0.7666666666666667,0.967741935483871,1.0,0.5862068965517241,0.45161290322580644,0.5666666666666667,0.5806451612903226,0.4666666666666667,0.6451612903225806,0.3548387096774194,0.6333333333333333,0.5483870967741935,0.5,0.5161290322580645,0.45161290322580644,0.7857142857142857,0.6451612903225806,0.8,0.41935483870967744,0.3333333333333333,0.3870967741935484,0.2903225806451613,0.5,0.6129032258064516,0.7666666666666667,0.45161290322580644,0.41935483870967744,0.5714285714285714,0.5161290322580645,0.4666666666666667,0.5483870967741935,0.6,0.5161290322580645,0.7419354838709677,0.7,0.6451612903225806,0.6,0.41935483870967744,0.7419354838709677,0.5,0.6451612903225806,0.4666666666666667,0.41935483870967744,0.4,0.5483870967741935,0.3548387096774194,0.43333333333333335,0.3870967741935484,0.4666666666666667,0.4838709677419355,0.5161290322580645,0.4827586206896552,0.6451612903225806,0.6666666666666666,0.7419354838709677,0.7333333333333333,0.8709677419354839,0.5483870967741935,0.4666666666666667,0.8064516129032258,0.5666666666666667,0.45161290322580644,0.4838709677419355,0.4642857142857143,0.6129032258064516,0.6666666666666666,0.5483870967741935,0.4666666666666667,0.6774193548387096,0.7096774193548387,0.7,0.8387096774193549,1.0333333333333334,0.4838709677419355,0.7419354838709677,0.7142857142857143,0.4838709677419355,0.7,0.8709677419354839,0.43333333333333335,0.5483870967741935,0.8709677419354839,1.0],"box":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.03225806451612903,0.0,0.03333333333333333,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.03333333333333333,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.03225806451612903,0.03333333333333333,0.0,0.0,0.06666666666666667,0.03225806451612903,0.1,0.0,0.0,0.0,0.0,0.0,0.03225806451612903,0.06666666666666667,0.16129032258064516,0.45161290322580644,0.5666666666666667]}},"quality":[{"layer":"chokepoint","place":"Cape of Good Hope","days_present":2841,"days_expected":2841,"first_date":"2019-01-01","last_date":"2026-10-11","zero_days":0,"count_mismatch_days":0,"max_volume_gap_t":4.0,"coverage":1.0,"zero_share":0.0},{"layer":"chokepoint","place":"Malacca Strait","days_present":2841,"days_expected":2841,"first_date":"2019-01-01","last_date":"2026-10-11","zero_days":0,"count_mismatch_days":0,"max_volume_gap_t":4.0,"coverage":1.0,"zero_share":0.0},{"layer":"chokepoint","place":"Suez Canal","days_present":2841,"days_expected":2841,"first_date":"2019-01-01","last_date":"2026-10-11","zero_days":0,"count_mismatch_days":0,"max_volume_gap_t":4.0,"coverage":1.0,"zero_share":0.0},{"layer":"chokepoint","place":"Gibraltar Strait","days_present":2841,"days_expected":2841,"first_date":"2019-01-01","last_date":"2026-10-11","zero_days":0,"count_mismatch_days":0,"max_volume_gap_t":4.0,"coverage":1.0,"zero_share":0.0},{"layer":"chokepoint","place":"Bab el-Mandeb Strait","days_present":2841,"days_expected":2841,"first_date":"2019-01-01","last_date":"2026-10-11","zero_days":0,"count_mismatch_days":0,"max_volume_gap_t":4.0,"coverage":1.0,"zero_share":0.0},{"layer":"port","place":"Damietta","days_present":2839,"days_expected":2839,"first_date":"2019-01-01","last_date":"2026-10-09","zero_days":25,"count_mismatch_days":0,"max_volume_gap_t":3.0,"coverage":1.0,"zero_share":0.008805917576611482},{"layer":"port","place":"Alexandria","days_present":2839,"days_expected":2839,"first_date":"2019-01-01","last_date":"2026-10-09","zero_days":57,"count_mismatch_days":0,"max_volume_gap_t":4.0,"coverage":1.0,"zero_share":0.020077492074674182},{"layer":"port","place":"El Dekheila","days_present":2839,"days_expected":2839,"first_date":"2019-01-01","last_date":"2026-10-09","zero_days":116,"count_mismatch_days":0,"max_volume_gap_t":3.0,"coverage":1.0,"zero_share":0.040859457555477284},{"layer":"port","place":"Port Said","days_present":2839,"days_expected":2839,"first_date":"2019-01-01","last_date":"2026-10-09","zero_days":226,"count_mismatch_days":0,"max_volume_gap_t":2.0,"coverage":1.0,"zero_share":0.07960549489256781},{"layer":"port","place":"El Sokhna","days_present":2839,"days_expected":2839,"first_date":"2019-01-01","last_date":"2026-10-09","zero_days":466,"count_mismatch_days":0,"max_volume_gap_t":3.0,"coverage":1.0,"zero_share":0.16414230362803806},{"layer":"port","place":"Al Adabiyah","days_present":2839,"days_expected":2839,"first_date":"2019-01-01","last_date":"2026-10-09","zero_days":694,"count_mismatch_days":0,"max_volume_gap_t":2.0,"coverage":1.0,"zero_share":0.24445227192673477},{"layer":"port","place":"Sidi Kerir","days_present":2839,"days_expected":2839,"first_date":"2019-01-01","last_date":"2026-10-09","zero_days":1150,"count_mismatch_days":0,"max_volume_gap_t":0.0,"coverage":1.0,"zero_share":0.40507220852412823},{"layer":"port","place":"Safaga","days_present":2839,"days_expected":2839,"first_date":"2019-01-01","last_date":"2026-10-09","zero_days":1497,"count_mismatch_days":0,"max_volume_gap_t":2.0,"coverage":1.0,"zero_share":0.5272983444874956},{"layer":"port","place":"As Suways","days_present":2839,"days_expected":2839,"first_date":"2019-01-01","last_date":"2026-10-09","zero_days":1701,"count_mismatch_days":0,"max_volume_gap_t":2.0,"coverage":1.0,"zero_share":0.5991546319126453},{"layer":"port","place":"Egyptian LNG Terminal","days_present":2839,"days_expected":2839,"first_date":"2019-01-01","last_date":"2026-10-09","zero_days":2674,"count_mismatch_days":0,"max_volume_gap_t":0.0,"coverage":1.0,"zero_share":0.9418809439943642},{"layer":"port","place":"Zeit Bay","days_present":2839,"days_expected":2839,"first_date":"2019-01-01","last_date":"2026-10-09","zero_days":2789,"count_mismatch_days":0,"max_volume_gap_t":0.0,"coverage":1.0,"zero_share":0.982388164846777},{"layer":"port","place":"Ras Shukheir","days_present":2839,"days_expected":2839,"first_date":"2019-01-01","last_date":"2026-10-09","zero_days":2839,"count_mismatch_days":0,"max_volume_gap_t":0.0,"coverage":1.0,"zero_share":1.0},{"layer":"port","place":"Ras Gharib","days_present":2839,"days_expected":2839,"first_date":"2019-01-01","last_date":"2026-10-09","zero_days":2839,"count_mismatch_days":0,"max_volume_gap_t":0.0,"coverage":1.0,"zero_share":1.0}],"outliers":[{"chokepoint_name":"Suez","date":"2020-01-30","transits":89.0,"median_15d":59.0,"deviation":0.5084745762711864},{"chokepoint_name":"Suez","date":"2021-03-24","transits":14.0,"median_15d":47.0,"deviation":-0.7021276595744681},{"chokepoint_name":"Suez","date":"2021-03-25","transits":2.0,"median_15d":48.0,"deviation":-0.9583333333333334},{"chokepoint_name":"Suez","date":"2021-03-26","transits":9.0,"median_15d":48.0,"deviation":-0.8125},{"chokepoint_name":"Suez","date":"2021-03-27","transits":9.0,"median_15d":48.0,"deviation":-0.8125},{"chokepoint_name":"Suez","date":"2021-03-28","transits":10.0,"median_15d":48.0,"deviation":-0.7916666666666666},{"chokepoint_name":"Suez","date":"2021-05-27","transits":82.0,"median_15d":53.0,"deviation":0.5471698113207548},{"chokepoint_name":"Suez","date":"2024-09-02","transits":56.0,"median_15d":37.0,"deviation":0.5135135135135136},{"chokepoint_name":"Suez","date":"2024-11-23","transits":51.0,"median_15d":33.0,"deviation":0.5454545454545454},{"chokepoint_name":"Suez","date":"2024-12-12","transits":10.0,"median_15d":38.0,"deviation":-0.736842105263158},{"chokepoint_name":"Suez","date":"2025-01-03","transits":50.0,"median_15d":33.0,"deviation":0.5151515151515151},{"chokepoint_name":"Suez","date":"2025-01-06","transits":55.0,"median_15d":35.0,"deviation":0.5714285714285714},{"chokepoint_name":"Suez","date":"2025-04-29","transits":59.0,"median_15d":35.0,"deviation":0.6857142857142857},{"chokepoint_name":"Suez","date":"2025-08-20","transits":61.0,"median_15d":40.0,"deviation":0.5249999999999999}],"outlier_counts":{"Cape of Good Hope":65,"Suez":14,"Bab el-Mandeb":7,"Gibraltar":1}};
+  const M = D.months;
+  const $ = (s, r = document) => r.querySelector(s);
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = (tag, attrs = {}, parent) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  };
+  const minus = "−";
+  const MONTH = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const monthLabel = (m) => MONTH[+m.slice(5, 7) - 1] + " " + m.slice(0, 4);
+  const dateLabel = (d) => +d.slice(8, 10) + " " + MONTH[+d.slice(5, 7) - 1] + " " + d.slice(0, 4);
+  const f0 = (v) => v == null ? "–" : Math.round(v).toLocaleString("en-US");
+  const f1 = (v) => v == null ? "–" : v.toFixed(1);
+  const mt = (v, d = 2) => v == null ? "–" : (v / 1e6).toFixed(d) + " Mt";
+  const kt = (v) => v == null ? "–" : (v / 1e3).toFixed(1) + " kt";
+  const bn = (v, d = 1) => v == null ? "–" : "$" + (v / 1e9).toFixed(d) + "bn";
+  const sp = (v, d = 0) => {
+    if (v == null) return "–";
+    const s = Math.abs(v * 100).toFixed(d);
+    return (+s === 0 ? "" : v >= 0 ? "+" : minus) + s + "%";
+  };
+  const pct = (v, d = 0) => v == null ? "–" : (v * 100).toFixed(d) + "%";
+  const cls = (v) => v == null ? "" : v < -0.005 ? "neg" : v > 0.005 ? "pos" : "";
+  const cssVar = (n) => `var(--${n})`;
+  const last = (a) => a[a.length - 1];
+  const P = Object.fromEntries(D.periods.map((p) => [p.period, p]));
+
+  /* ---------------- tooltip ---------------- */
+  const tip = $("#tip");
+  function showTip(evt, html) {
+    tip.innerHTML = html;
+    tip.classList.add("on");
+    const pad = 14, r = tip.getBoundingClientRect();
+    let x = evt.clientX + pad, y = evt.clientY + pad;
+    if (x + r.width > innerWidth - 8) x = evt.clientX - r.width - pad;
+    if (y + r.height > innerHeight - 8) y = evt.clientY - r.height - pad;
+    tip.style.left = Math.max(8, x) + "px";
+    tip.style.top = Math.max(8, y) + "px";
+  }
+  const hideTip = () => tip.classList.remove("on");
+  const tipRow = (color, label, value) => `<div class="row"><i style="background:${cssVar(color)}"></i><span>${label}</span><span>${value}</span></div>`;
+  const hover = (el, html) => {
+    el.addEventListener("pointermove", (e) => showTip(e, html()));
+    el.addEventListener("pointerdown", (e) => showTip(e, html()));
+    el.addEventListener("pointerleave", hideTip);
+  };
+
+  /* ---------------- scales & small helpers ---------------- */
+  const lin = (d0, d1, r0, r1) => (v) => r0 + (v - d0) * (r1 - r0) / (d1 - d0);
+  function ticks(min, max, n = 5) {
+    const span = max - min, step0 = span / n, mag = 10 ** Math.floor(Math.log10(step0));
+    const step = [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => span / s <= n) || mag * 10;
+    const out = [];
+    for (let v = Math.ceil(min / step) * step; v <= max + step * 1e-9; v += step) out.push(+v.toFixed(10));
+    return out;
+  }
+  const niceMax = (v) => { const t = ticks(0, v, 5); return last(t) >= v ? last(t) : last(t) + (t[1] - t[0]); };
+  const legend = (host, items) => {
+    host.innerHTML = items.map((it) => `<span><i class="${it.kind || ""}" style="background:${it.kind === "dash" ? "" : cssVar(it.color)}"></i>${it.label}</span>`).join("");
+  };
+  function table(host, head, rows, cellClass) {
+    host.innerHTML = `<table><thead><tr>${head.map((c) => `<th scope="col">${c}</th>`).join("")}</tr></thead><tbody>${rows.map((r, ri) => `<tr>${r.map((c, i) => {
+      const k = cellClass ? cellClass(ri, i) : "";
+      return i === 0 ? `<th scope="row" style="text-align:left;font:500 var(--t-sm)/1.3 var(--f-body);color:var(--ink);text-transform:none;letter-spacing:0">${c}</th>` : `<td class="${k}">${c}</td>`;
+    }).join("")}</tr>`).join("")}</tbody></table>`;
+  }
+  function segmented(host, onChange) {
+    host.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
+      host.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      onChange(b.dataset.v);
+    }));
+  }
+
+  /* ---------------- charts ---------------- */
+  const charts = [];
+  function mount(host, draw) {
+    const c = { host, draw, w: 0 };
+    charts.push(c);
+    c.render = () => { c.w = host.clientWidth; if (c.w > 0) draw(host, c.w); };
+    c.render();
+    return c;
+  }
+  const ro = new ResizeObserver(() => charts.forEach((c) => { if (Math.abs(c.host.clientWidth - c.w) > 2) c.render(); }));
+
+  // Fractional position of a date on the shared month axis (month points sit mid-month).
+  const monthPos = (d) => {
+    const i = M.indexOf(d.slice(0, 7));
+    const days = new Date(+d.slice(0, 4), +d.slice(5, 7), 0).getDate();
+    return i + (+d.slice(8, 10) - 1) / days - 0.5;
+  };
+
+  // Monthly line chart: crosshair tooltip, dashed reference level, shaded crisis period and
+  // numbered event badges (labels live in a list under the chart so they never collide).
+  function monthChart(host, w, o) {
+    host.innerHTML = "";
+    const narrow = w < 520;
+    const H = o.height || (narrow ? 250 : 320);
+    const m = { t: o.events ? 30 : 12, r: o.endLabels && !narrow ? (o.endWidth || 120) : 12, b: 26, l: o.left || 44 };
+    const s = svg("svg", { viewBox: `0 0 ${w} ${H}`, role: "img", "aria-label": o.aria || "" }, host);
+    const x = lin(0, M.length - 1, m.l, w - m.r);
+    const y = lin(0, o.yMax, H - m.b, m.t);
+    const g = svg("g", {}, s);
+    if (o.shadeFrom) {
+      const x0 = x(monthPos(o.shadeFrom));
+      svg("rect", { x: x0, y: m.t, width: w - m.r - x0, height: H - m.b - m.t, style: "fill:var(--bab);opacity:.07" }, g);
+    }
+    for (const t of ticks(0, o.yMax, narrow ? 4 : 5)) {
+      svg("line", { x1: m.l, x2: w - m.r, y1: y(t), y2: y(t), style: `stroke:var(${t === 0 ? "--ink-3" : "--rule"});stroke-width:1` }, g);
+      const tx = svg("text", { x: m.l - 7, y: y(t) + 4, "text-anchor": "end", style: "fill:var(--ink-3);font-size:11.5px" }, g);
+      tx.textContent = o.yFmt(t);
+    }
+    M.forEach((mm, i) => {
+      if (mm.slice(5) !== "01") return;
+      const yr = +mm.slice(0, 4);
+      if (narrow && yr % 2 === 0) return;
+      svg("line", { x1: x(i), x2: x(i), y1: H - m.b, y2: H - m.b + 4, style: "stroke:var(--ink-3)" }, g);
+      const tx = svg("text", { x: x(i) + 2, y: H - 8, "text-anchor": "start", style: "fill:var(--ink-3);font-size:11.5px" }, g);
+      tx.textContent = narrow ? "’" + String(yr).slice(2) : yr;
+    });
+    if (o.ref != null) {
+      svg("line", { x1: m.l, x2: w - m.r, y1: y(o.ref), y2: y(o.ref), style: "stroke:var(--ink-3);stroke-width:1.2;stroke-dasharray:5 4" }, g);
+    }
+    if (o.events) {
+      let prevX = -99;
+      o.events.forEach((ev, k) => {
+        const ex = x(monthPos(ev.date));
+        const bx = Math.max(ex, prevX + 18);
+        prevX = bx;
+        svg("line", { x1: ex, x2: ex, y1: m.t, y2: H - m.b, style: "stroke:var(--ink-3);stroke-dasharray:2 4;stroke-width:1" }, g);
+        if (bx !== ex) svg("path", { d: `M${ex} ${m.t} L${bx} 18`, style: "stroke:var(--ink-3);stroke-width:1;fill:none" }, g);
+        const badge = svg("g", { style: "cursor:default" }, g);
+        svg("circle", { cx: bx, cy: 10, r: 8, style: "fill:var(--ink)" }, badge);
+        const t = svg("text", { x: bx, y: 13.5, "text-anchor": "middle", style: "fill:var(--panel);font:600 10px var(--f-mono)" }, badge);
+        t.textContent = k + 1;
+        hover(badge, () => `<div class="th">${dateLabel(ev.date)}</div>${ev.label}<div class="foot">Context from news reporting, not from PortWatch.</div>`);
+      });
+    }
+    const pts = [];
+    o.series.forEach((se) => {
+      const d = se.values.map((v, i) => v == null ? null : [x(i), y(v)]);
+      let path = "", pen = false;
+      d.forEach((p) => { if (!p) { pen = false; return; } path += (pen ? "L" : "M") + p[0].toFixed(1) + "," + p[1].toFixed(1); pen = true; });
+      svg("path", { d: path, style: `fill:none;stroke:var(--${se.color});stroke-width:${se.width || 2.25};stroke-linejoin:round;stroke-linecap:round` }, g);
+      const li = se.values.map((v) => v != null).lastIndexOf(true);
+      if (li >= 0) {
+        svg("circle", { cx: d[li][0], cy: d[li][1], r: 3.5, style: `fill:var(--${se.color});stroke:var(--panel);stroke-width:2` }, g);
+        if (o.endLabels && !narrow) pts.push({ y: d[li][1], x: d[li][0], se, v: se.values[li] });
+      }
+    });
+    pts.sort((a, b) => a.y - b.y);
+    for (let i = 1; i < pts.length; i++) if (pts[i].y - pts[i - 1].y < 15) pts[i].y = pts[i - 1].y + 15;
+    pts.forEach((p) => {
+      const t = svg("text", { x: p.x + 8, y: p.y + 4, style: `fill:var(--${p.se.color});font-size:12px;font-weight:700` }, g);
+      t.textContent = o.endLabel(p.se, p.v);
+    });
+    const hv = svg("g", { style: "pointer-events:none;opacity:0" }, s);
+    const cross = svg("line", { y1: m.t, y2: H - m.b, style: "stroke:var(--ink-3);stroke-width:1" }, hv);
+    const dots = o.series.map((se) => svg("circle", { r: 4.5, style: `fill:var(--${se.color});stroke:var(--panel);stroke-width:2` }, hv));
+    const hit = svg("rect", { x: m.l, y: m.t, width: w - m.l - m.r, height: H - m.t - m.b, style: "fill:transparent;cursor:crosshair" }, s);
+    const move = (evt) => {
+      const r = s.getBoundingClientRect();
+      const px = (evt.clientX - r.left) * (w / r.width);
+      let i = Math.round((px - m.l) / ((w - m.l - m.r) / (M.length - 1)));
+      i = Math.max(0, Math.min(M.length - 1, i));
+      cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i));
+      o.series.forEach((se, k) => {
+        const v = se.values[i];
+        dots[k].style.display = v == null ? "none" : "";
+        if (v != null) { dots[k].setAttribute("cx", x(i)); dots[k].setAttribute("cy", y(v)); }
+      });
+      hv.style.opacity = 1;
+      showTip(evt, o.tooltip(i));
+    };
+    hit.addEventListener("pointermove", move);
+    hit.addEventListener("pointerdown", move);
+    hit.addEventListener("pointerleave", () => { hv.style.opacity = 0; hideTip(); });
+  }
+
+  // Horizontal bars diverging from zero (percentage change). On narrow screens the label sits
+  // above each bar and the before → after note moves below it, so nothing overlaps.
+  function divBars(host, w, o) {
+    host.innerHTML = "";
+    const narrow = w < 560;
+    const hasNote = o.rows.some((r) => r.note);
+    const rowH = narrow ? (hasNote ? 58 : 44) : 34;
+    const labelW = narrow ? 0 : Math.min(130, w * 0.24);
+    const m = { t: 22, r: 10, b: 6, l: narrow ? 4 : labelW + 10 };
+    const H = m.t + rowH * o.rows.length + m.b;
+    const s = svg("svg", { viewBox: `0 0 ${w} ${H}`, role: "img", "aria-label": o.aria || "" }, host);
+    const vals = o.rows.map((r) => r.v).filter((v) => v != null);
+    const lo = Math.min(0, ...vals), hi = Math.max(0, ...vals);
+    const span = hi - lo || 1;
+    const mixed = lo < 0 && hi > 0;
+    const noteRoom = hasNote && !narrow ? 0.75 : 0.3;
+    const x = lin(lo - (lo < 0 && !mixed ? span * 0.2 : lo < 0 ? span * 0.03 : 0), hi + span * (hi > 0 ? noteRoom : 0.04), m.l, w - m.r);
+    const g = svg("g", {}, s);
+    for (const t of ticks(lo, hi, narrow ? 3 : 5)) {
+      // On narrow screens row labels sit above the bars, so full-height gridlines would cross them;
+      // the zero line is drawn per bar instead (below).
+      if (!narrow) svg("line", { x1: x(t), x2: x(t), y1: m.t - 6, y2: H - m.b, style: `stroke:var(${t === 0 ? "--ink-3" : "--rule-2"});stroke-width:1` }, g);
+      const tx = svg("text", { x: x(t), y: 12, "text-anchor": "middle", style: "fill:var(--ink-3);font-size:11px" }, g);
+      tx.textContent = sp(t);
+    }
+    o.rows.forEach((r, i) => {
+      const top = m.t + rowH * i;
+      const by = top + (narrow ? 20 : 7), bh = narrow ? 15 : rowH - 14;
+      const row = svg("g", { style: "cursor:default" }, g);
+      svg("rect", { x: 0, y: top, width: w, height: rowH, style: "fill:transparent" }, row);
+      if (narrow) svg("line", { x1: x(0), x2: x(0), y1: by - 3, y2: by + bh + 3, style: "stroke:var(--ink-3);stroke-width:1" }, row);
+      const lt = svg("text", narrow
+        ? { x: m.l, y: top + 13, style: "fill:var(--ink);font-size:12.5px;font-weight:600;paint-order:stroke;stroke:var(--panel);stroke-width:4px;stroke-linejoin:round" }
+        : { x: labelW, y: by + bh / 2 + 4, "text-anchor": "end", style: "fill:var(--ink);font-size:12.5px;font-weight:600" }, row);
+      lt.textContent = r.label;
+      if (r.v == null) {
+        const t = svg("text", { x: x(0) + 6, y: by + bh / 2 + 4, style: "fill:var(--ink-3);font-size:11.5px" }, row);
+        t.textContent = "no baseline traffic";
+        return hover(row, () => o.tooltip(r));
+      }
+      const x0 = x(Math.min(0, r.v)), x1 = x(Math.max(0, r.v));
+      svg("rect", { x: x0, y: by, width: Math.max(1, x1 - x0), height: bh, rx: 3, style: `fill:var(--${r.color})` }, row);
+      // With gains and losses on one chart, losses are labelled right of zero so the text never
+      // runs into the row labels on the left.
+      const right = r.v >= 0 || mixed;
+      const t = svg("text", { x: r.v >= 0 ? x1 + 6 : mixed ? x(0) + 6 : x0 - 6, y: by + bh / 2 + 4, "text-anchor": right ? "start" : "end", style: "fill:var(--ink);font-size:11.5px;font-weight:700;paint-order:stroke;stroke:var(--panel);stroke-width:4px;stroke-linejoin:round" }, row);
+      t.textContent = sp(r.v);
+      if (r.note) {
+        if (narrow) {
+          const n = svg("text", { x: m.l, y: by + bh + 14, style: "fill:var(--ink-3);font-size:11px;paint-order:stroke;stroke:var(--panel);stroke-width:4px;stroke-linejoin:round" }, row);
+          n.textContent = r.note;
+        } else {
+          const ts = svg("tspan", { style: "fill:var(--ink-3);font-weight:400" }, t);
+          ts.textContent = "  " + r.note;
+        }
+      }
+      hover(row, () => o.tooltip(r));
+    });
+  }
+
+  // Vertical bars per year with optional reference diamonds.
+  function yearBars(host, w, o) {
+    host.innerHTML = "";
+    const narrow = w < 520;
+    const H = narrow ? 250 : 300;
+    const m = { t: 22, r: 8, b: 26, l: 46 };
+    const s = svg("svg", { viewBox: `0 0 ${w} ${H}`, role: "img", "aria-label": o.aria || "" }, host);
+    const band = (w - m.l - m.r) / o.rows.length;
+    const bw = Math.min(band * 0.64, 58);
+    const y = lin(0, o.yMax, H - m.b, m.t);
+    const g = svg("g", {}, s);
+    for (const t of ticks(0, o.yMax, 4)) {
+      svg("line", { x1: m.l, x2: w - m.r, y1: y(t), y2: y(t), style: `stroke:var(${t === 0 ? "--ink-3" : "--rule"});stroke-width:1` }, g);
+      const tx = svg("text", { x: m.l - 7, y: y(t) + 4, "text-anchor": "end", style: "fill:var(--ink-3);font-size:11.5px" }, g);
+      tx.textContent = o.yFmt(t);
+    }
+    o.rows.forEach((r, i) => {
+      const cx = m.l + band * (i + 0.5);
+      const col = svg("g", { style: "cursor:default" }, g);
+      svg("rect", { x: cx - band / 2, y: m.t, width: band, height: H - m.t - m.b, style: "fill:transparent" }, col);
+      svg("rect", { x: cx - bw / 2, y: y(r.v), width: bw, height: y(0) - y(r.v), rx: 3, style: `fill:var(--${r.color});${r.partial ? "opacity:.45" : ""}` }, col);
+      if (r.partial) svg("rect", { x: cx - bw / 2 + 0.75, y: y(r.v) + 0.75, width: bw - 1.5, height: y(0) - y(r.v) - 1.5, rx: 3, style: `fill:none;stroke:var(--${r.color});stroke-width:1.5;stroke-dasharray:4 3` }, col);
+      const top = Math.min(y(r.v), r.ref != null ? y(r.ref) - 6 : Infinity);
+      const label = svg("text", { x: cx, y: top - 7, "text-anchor": "middle", style: `fill:var(--ink);font-size:${narrow ? 9.5 : 11.5}px;font-weight:700` }, col);
+      label.textContent = o.label(r);
+      if (r.ref != null) {
+        const ry = y(r.ref);
+        svg("rect", { x: cx - 5, y: ry - 5, width: 10, height: 10, transform: `rotate(45 ${cx} ${ry})`, style: "fill:var(--ink);stroke:var(--panel);stroke-width:1.5" }, col);
+      }
+      const tx = svg("text", { x: cx, y: H - 8, "text-anchor": "middle", style: "fill:var(--ink-3);font-size:11.5px" }, g);
+      tx.textContent = narrow ? "’" + String(r.year).slice(2) : r.year;
+      hover(col, () => o.tooltip(r));
+    });
+  }
+
+  // 100% stacked horizontal bars, one per period.
+  function stack100(host, w, o) {
+    host.innerHTML = "";
+    const rowH = 48;
+    const H = rowH * o.rows.length;
+    const s = svg("svg", { viewBox: `0 0 ${w} ${H}`, role: "img", "aria-label": o.aria || "" }, host);
+    o.rows.forEach((r, i) => {
+      const top = rowH * i;
+      const t = svg("text", { x: 0, y: top + 12, style: "fill:var(--ink-2);font-size:12px;font-weight:600" }, s);
+      t.textContent = r.label;
+      let acc = 0;
+      r.parts.forEach((p) => {
+        const x0 = acc * w, pw = p.v * w;
+        acc += p.v;
+        const seg = svg("g", { style: "cursor:default" }, s);
+        svg("rect", { x: x0, y: top + 18, width: Math.max(0, pw - 2), height: 22, style: `fill:var(--${p.color})` }, seg);
+        if (pw > 36) {
+          const lt = svg("text", { x: x0 + 5, y: top + 33, style: "fill:#fff;font-size:11px;font-weight:700;pointer-events:none" }, seg);
+          lt.textContent = pct(p.v);
+        }
+        hover(seg, () => `<div class="th">${r.label}</div>${tipRow(p.color, p.label, pct(p.v, 1))}`);
+      });
+    });
+  }
+
+  function sparkline(el, values, color) {
+    const vals = values.filter((v) => v != null);
+    const w = 200, H = 44, pad = 4;
+    const s = svg("svg", { viewBox: `0 0 ${w} ${H}`, preserveAspectRatio: "none", "aria-hidden": "true" }, el);
+    const mn = Math.min(...vals), mx = Math.max(...vals);
+    const x = lin(0, vals.length - 1, pad, w - pad), y = lin(mn - (mx - mn) * 0.1, mx + (mx - mn) * 0.1, H - pad, pad);
+    const p = vals.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`);
+    svg("polygon", { points: `${x(0)},${H} ${p.join(" ")} ${x(vals.length - 1)},${H}`, style: `fill:var(--${color});opacity:.1` }, s);
+    svg("polyline", { points: p.join(" "), style: `fill:none;stroke:var(--${color});stroke-width:2;vector-effect:non-scaling-stroke;stroke-linejoin:round` }, s);
+    svg("circle", { cx: x(vals.length - 1), cy: y(last(vals)), r: 3.5, style: `fill:var(--${color});stroke:var(--panel);stroke-width:1.5;vector-effect:non-scaling-stroke` }, s);
+  }
+
+  /* ---------------- data shortcuts ---------------- */
+  const meta = D.meta;
+  const S = Object.fromEntries(D.decline.map((r) => [r.period, r]));
+  const RP = {};
+  D.route_periods.forEach((r) => { (RP[r.chokepoint_name] ||= {})[r.period] = r; });
+  const R = D.routes;
+  const KEYS = ["suez", "bab", "cape", "gib", "mal"];
+  const NAME = Object.fromEntries(KEYS.map((k) => [k, R[k].name]));
+  const rp = (k, p) => RP[NAME[k]][p];
+  const V = D.vessel;
+  const A = D.annual;
+  const L = D.lost;
+  const lostTotal = last(L);
+  const annual = (y) => A.find((r) => r.year === y);
+  const latestDays = meta.latest_window_days;
+  const latestRange = `${dateLabel(P.latest.start_date)} – ${dateLabel(P.latest.end_date)}`;
+  const lostRounded = Math.round(lostTotal.cumulative_lost_transits / 100) * 100;
+
+  /* ---------------- masthead ---------------- */
+  $("#lede").innerHTML = `Daily ship counts from AIS position signals, processed by the IMF, show how the Red Sea attacks that began in November 2023 pushed world shipping away from Egypt's canal. In the latest ${latestDays} days Suez handled <b>${f0(S.latest.transits_per_day)} cargo ships a day</b>, against <b>${f0(S.baseline.transits_per_day)}</b> before the attacks.`;
+  const logItems = [
+    ["Source", "IMF PortWatch", "Open ArcGIS layers"],
+    ["Coverage", `2019 – ${dateLabel(meta.last_chokepoint_date)}`, "Daily, UTC"],
+    ["Chokepoints", "28 tracked", "5 on the Asia–Europe route"],
+    ["Egyptian ports", `${D.quality.filter((r) => r.layer === "port").length} tracked`, `${D.ports.length} with weekly traffic`],
+    ["Daily records", meta.silver_rows.toLocaleString("en-US"), `${meta.raw_files} raw files`],
+    ["Latest window", `${latestDays} days`, `to ${dateLabel(P.latest.end_date)}`],
+  ];
+  $("#log").innerHTML = logItems.map(([k, v, s]) => `<div><dt>${k}</dt><dd>${v}<small>${s}</small></dd></div>`).join("");
+
+  /* ---------------- KPIs ---------------- */
+  const kpis = [
+    { label: "Suez transits per day", color: "suez", value: f1(S.latest.transits_per_day), unit: "ships", d: S.latest.transits_vs_baseline, base: `${f1(S.baseline.transits_per_day)} before`, spark: R.suez.transits },
+    { label: "Suez cargo per day", color: "suez", value: (S.latest.volume_t_per_day / 1e6).toFixed(2), unit: "Mt", d: S.latest.volume_vs_baseline, base: `${mt(S.baseline.volume_t_per_day)} before`, spark: R.suez.volume },
+    { label: "Cape of Good Hope per day", color: "cape", value: f1(rp("cape", "latest").transits_per_day), unit: "ships", d: rp("cape", "latest").transits_vs_baseline, base: `${f1(rp("cape", "baseline").transits_per_day)} before`, spark: R.cape.transits },
+    { label: "Canal revenue proxy, 2025", color: "bab", value: bn(annual(2025).revenue_proxy_usd_annualised), unit: "", d: annual(2025).volume_index_2023 - 1, base: `${bn(meta.sca.revenue_2023, 2)} in 2023`, spark: A.map((r) => r.revenue_proxy_usd_annualised) },
+  ];
+  $("#kpis").innerHTML = kpis.map((k, i) => `<div class="kpi"><span class="label"><i style="background:${cssVar(k.color)}"></i>${k.label}</span><span class="value">${k.value}${k.unit ? `<small>${k.unit}</small>` : ""}</span><span class="delta"><b class="${k.d < 0 ? "down" : "up"}">${sp(k.d)}</b> vs ${k.base}</span><div id="spark-${i}"></div></div>`).join("");
+  kpis.forEach((k, i) => sparkline($(`#spark-${i}`), k.spark, k.color));
+
+  /* ---------------- insights ---------------- */
+  const cont = V.find((v) => v.vessel_type === "container");
+  const sokhna = D.ports.find((p) => p.port_name === "El Sokhna");
+  const check2024 = annual(2024).revenue_proxy_usd_annualised / meta.sca.revenue_2024 - 1;
+  const insights = [
+    ["risk", "i-alert", "Risk", "#suez", "No recovery after almost three years",
+      `Suez averaged ${f1(S.latest.transits_per_day)} ships a day in the latest ${latestDays} days, ${sp(S.latest.transits_vs_baseline)} against early 2023. In 2024 it was ${sp(S.crisis_2024.transits_vs_baseline)}. The level has moved sideways, not back up.`],
+    ["shift", "i-shift", "Shift", "#routes", "Re-routed, not lost",
+      `The Cape gained ${f0(rp("cape", "latest").transits_change_per_day)} ships a day while Bab el-Mandeb lost ${f0(-rp("bab", "latest").transits_change_per_day)}. Malacca, upstream, is flat (${sp(rp("mal", "latest").transits_vs_baseline, 1)}): the trade still moves, the long way round.`],
+    ["watch", "i-eye", "Watch", "#vessels", "The biggest ships left",
+      `Container ship transits fell ${sp(cont.transits_change_2024)} in 2024, but their cargo tonnage fell ${sp(cont.volume_change_2024)}. The average transit now carries ${kt(S.latest.tonnes_per_transit)}, against ${kt(S.baseline.tonnes_per_transit)} before.`],
+    ["risk", "i-alert", "Risk", "#revenue", "About $6bn a year of canal revenue gone",
+      `Scaling 2023's $10.25bn by tonnage gives ${bn(annual(2024).revenue_proxy_usd_annualised)} for 2024. The SCA reported ${bn(meta.sca.revenue_2024, 2)}, a ${sp(check2024, 1)} gap, so the proxy holds up.`],
+    ["risk", "i-alert", "Risk", "#revenue", `About ${f0(lostRounded)} transits that did not happen`,
+      `Against the 2023 run-rate, about ${f0(lostRounded)} transits and ${(lostTotal.cumulative_lost_volume_t / 1e9).toFixed(1)}bn tonnes of cargo bypassed the canal between 19 Nov 2023 and ${dateLabel(meta.last_chokepoint_date)}.`],
+    ["shift", "i-shift", "Shift", "#ports", "El Sokhna grew while Mediterranean ports held",
+      `El Sokhna's port calls rose from ${f1(sokhna.baseline_calls)} to ${f1(sokhna.latest_calls)} a day (${sp(sokhna.calls_change_latest)}). Damietta and El Dekheila stayed within a few percent; Alexandria and Port Said slipped about 12%.`],
+  ];
+  $("#insights").innerHTML = insights.map(([c, icon, chip, href, t, p]) => `<a class="insight" href="${href}"><span class="chip ${c}"><svg><use href="#${icon}"/></svg>${chip}</span><h3>${t}</h3><p>${p}</p><span class="go">See the evidence →</span></a>`).join("");
+
+  /* ---------------- Q1 Suez ---------------- */
+  $("#suez-ctx").innerHTML = `Before the attacks, the canal carried <b>${f1(S.baseline.transits_per_day)} cargo ships</b> and an estimated <b>${mt(S.baseline.volume_t_per_day)}</b> of cargo a day (January–October 2023). In 2024 that fell to ${f1(S.crisis_2024.transits_per_day)} ships (${sp(S.crisis_2024.transits_vs_baseline)}) and ${mt(S.crisis_2024.volume_t_per_day)} (${sp(S.crisis_2024.volume_vs_baseline)}). In the latest ${latestDays} days (${latestRange}) traffic is still <b>${sp(S.latest.transits_vs_baseline)} in ships and ${sp(S.latest.volume_vs_baseline)} in tonnes</b>. A small rise since mid-2025 is within the range of the 2024 months.`;
+  let suezMode = "transits";
+  const suezChart = mount($("#suez-chart"), (host, w) => {
+    const vol = suezMode === "volume";
+    const vals = vol ? R.suez.volume.map((v) => v == null ? null : v / 1e6) : R.suez.transits;
+    const ref = vol ? S.baseline.volume_t_per_day / 1e6 : S.baseline.transits_per_day;
+    monthChart(host, w, {
+      aria: "Monthly average daily Suez Canal transits, 2019 to 2026",
+      yMax: vol ? 4 : 90, ref, shadeFrom: "2023-11-19", events: D.events,
+      yFmt: (t) => vol ? t.toFixed(0) + " Mt" : t, left: vol ? 46 : 36,
+      series: [{ name: "Suez", color: "suez", values: vals, width: 2.5 }],
+      tooltip: (i) => {
+        const v = vals[i];
+        return `<div class="th">${monthLabel(M[i])} · Suez Canal</div>${tipRow("suez", vol ? "Cargo per day" : "Ships per day", vol ? v.toFixed(2) + " Mt" : f1(v))}<div class="foot">${sp(v / ref - 1)} vs the Jan–Oct 2023 average (${vol ? ref.toFixed(2) + " Mt" : f1(ref)})</div>`;
+      },
+    });
+  });
+  legend($("#suez-legend"), [{ color: "suez", label: "Suez Canal", kind: "line" }, { kind: "dash", label: "Jan–Oct 2023 average" }]);
+  segmented($("#suez-mode"), (v) => { suezMode = v; suezChart.render(); });
+  $("#suez-events").innerHTML = D.events.map((e, i) => `<li><b>${i + 1}</b><span class="d">${dateLabel(e.date)}</span><span>${e.label}</span></li>`).join("");
+  $("#suez-stats").innerHTML = ["baseline", "crisis_2024", "year_2025", "latest"].map((p) => {
+    const r = S[p];
+    const title = p === "latest" ? `Latest ${latestDays} days` : p === "baseline" ? "Jan–Oct 2023" : r.period_label;
+    return `<div class="stat"><div class="k">${title}</div><div class="v ${p === "baseline" ? "" : "neg"}">${f1(r.transits_per_day)}</div><div class="s">${mt(r.volume_t_per_day)} · ${p === "baseline" ? "baseline" : sp(r.transits_vs_baseline) + " ships"}</div></div>`;
+  }).join("") + `<div class="stat" style="grid-column:1/-1"><div class="k">Like-for-like: same ${latestDays} calendar days</div><div class="v">${f1(S.latest_2023.transits_per_day)} → ${f1(S.latest.transits_per_day)}</div><div class="s">2023 vs ${P.latest.end_date.slice(0, 4)}: ${sp(S.latest.transits_per_day / S.latest_2023.transits_per_day - 1)} ships, ${sp(S.latest.volume_t_per_day / S.latest_2023.volume_t_per_day - 1)} tonnes</div></div>`;
+  table($("#suez-table"), ["Period", "Dates", "Days", "Ships / day", "vs baseline", "Cargo / day", "vs baseline", "Tonnes per ship"],
+    D.decline.map((r) => [r.period_label, `${r.start_date} → ${r.end_date}`, r.days, f1(r.transits_per_day), sp(r.transits_vs_baseline, 1), mt(r.volume_t_per_day), sp(r.volume_vs_baseline, 1), f0(r.tonnes_per_transit)]),
+    (ri, i) => i === 4 ? cls(D.decline[ri].transits_vs_baseline) : i === 6 ? cls(D.decline[ri].volume_vs_baseline) : "");
+
+  /* ---------------- Q2 Routes ---------------- */
+  $("#routes-ctx").innerHTML = `In the latest ${latestDays} days the Cape of Good Hope averaged <b>${f1(rp("cape", "latest").transits_per_day)} ships a day</b> (${sp(rp("cape", "latest").transits_vs_baseline)}), more than Suez's ${f1(S.baseline.transits_per_day)} before the crisis. Bab el-Mandeb is down <b>${sp(rp("bab", "latest").transits_vs_baseline)}</b>, more than Suez (${sp(rp("suez", "latest").transits_vs_baseline)}). That gap suggests part of today's Suez traffic only travels between the Mediterranean and Red Sea ports such as Jeddah, Aqaba or El Sokhna, without passing the southern strait; the counts alone cannot confirm it. Gibraltar is ${sp(rp("gib", "latest").transits_vs_baseline)} and Malacca is flat (${sp(rp("mal", "latest").transits_vs_baseline, 1)}).`;
+
+  let mapPeriod = "baseline";
+  const mapChart = mount($("#map"), (host, w) => {
+    host.innerHTML = "";
+    const W = 640, H = 380, showText = w >= 420;
+    const s = svg("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Schematic map of the Red Sea and Cape of Good Hope routes between Asia and Europe" }, host);
+    svg("rect", { x: 0, y: 0, width: W, height: H, rx: 12, style: "fill:var(--sea)" }, s);
+    [
+      "M30 18 L262 14 L318 70 L286 92 L196 86 L104 96 L44 78 Z",
+      "M96 132 L250 122 L300 140 L326 196 L356 246 L344 284 L292 322 L240 338 L190 318 L132 266 L88 196 Z",
+      "M318 118 L408 112 L458 160 L440 222 L388 240 L350 196 L328 150 Z",
+      "M440 70 L640 40 L640 186 L572 180 L528 206 L476 160 Z",
+    ].forEach((d) => svg("path", { d, style: "fill:var(--land)" }, s));
+    const val = (k) => rp(k, mapPeriod).transits_per_day;
+    const width = (k) => Math.max(1.5, val(k) * 0.13);
+    const seg = (d, k) => svg("path", { d, style: `fill:none;stroke:var(--${k});stroke-width:${width(k)};stroke-linecap:round;stroke-linejoin:round;opacity:.9` }, s);
+    seg("M64 112 C 140 104, 230 100, 304 124", "suez");
+    seg("M304 124 C 318 170, 338 214, 366 250", "bab");
+    seg("M366 250 C 430 262, 500 246, 560 214 L 606 196", "bab");
+    seg("M64 112 C 40 170, 52 250, 112 300 C 170 352, 240 368, 290 354 C 380 330, 480 280, 560 214", "cape");
+    svg("path", { d: "M600 186 L 618 192 L 602 204", style: "fill:none;stroke:var(--ink-3);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round" }, s);
+    if (showText) {
+      const ta = svg("text", { x: 612, y: 228, "text-anchor": "end", style: "fill:var(--ink-3);font-size:13px;font-weight:600" }, s);
+      ta.textContent = "to Asia";
+      [["EUROPE", 150, 52], ["AFRICA", 200, 232], ["ASIA", 565, 112], ["ARABIA", 395, 165]].forEach(([t, x, y]) => {
+        const e = svg("text", { x, y, "text-anchor": "middle", style: "fill:var(--ink-3);font:600 13px var(--f-mono);letter-spacing:.15em" }, s);
+        e.textContent = t;
+      });
+    }
+    [
+      ["gib", 64, 112, "Gibraltar", -6, -16, "start"],
+      ["suez", 304, 124, "Suez", 12, -12, "start"],
+      ["bab", 366, 250, "Bab el-Mandeb", 14, 22, "start"],
+      ["cape", 270, 358, "Cape of Good Hope", 0, -16, "middle"],
+    ].forEach(([k, cx, cy, label, dx, dy, anchor]) => {
+      const gnode = svg("g", { style: "cursor:default" }, s);
+      svg("circle", { cx, cy, r: 9, style: `fill:var(--panel);stroke:var(--${k});stroke-width:3.5` }, gnode);
+      if (showText) {
+        const t = svg("text", { x: cx + dx, y: cy + dy, "text-anchor": anchor, style: "fill:var(--ink);font-size:15px;font-weight:700;paint-order:stroke;stroke:var(--sea);stroke-width:4px;stroke-linejoin:round" }, gnode);
+        t.textContent = `${label} ${f0(val(k))}`;
+      }
+      hover(gnode, () => `<div class="th">${label} · ${mapPeriod === "latest" ? "latest " + latestDays + " days" : P[mapPeriod].period_label}</div>${tipRow(k, "Ships per day", f1(val(k)))}${tipRow(k, "Cargo per day", mt(rp(k, mapPeriod).volume_t_per_day))}${mapPeriod === "baseline" ? "" : `<div class="foot">${sp(rp(k, mapPeriod).transits_vs_baseline)} vs Jan–Oct 2023</div>`}`);
+    });
+  });
+  const renderNodes = () => {
+    $("#nodes-h").textContent = `Ships per day · ${mapPeriod === "latest" ? "latest " + latestDays + " days" : mapPeriod === "baseline" ? "Jan–Oct 2023" : P[mapPeriod].period_label}`;
+    $("#nodes").innerHTML = KEYS.map((k) => {
+      const r = rp(k, mapPeriod), d = r.transits_vs_baseline;
+      const c = mapPeriod === "baseline" ? "flat" : d < -0.02 ? "neg" : d > 0.02 ? "pos" : "flat";
+      return `<div class="node"><i style="background:${cssVar(k)}"></i><div><div class="n">${NAME[k]}</div><div class="r">${RP[NAME[k]].baseline.route_role}</div></div><div class="v">${f1(r.transits_per_day)}<small class="${c}">${mapPeriod === "baseline" ? "baseline" : sp(d)}</small></div></div>`;
+    }).join("");
+  };
+  renderNodes();
+  segmented($("#map-period"), (v) => { mapPeriod = v; mapChart.render(); renderNodes(); });
+
+  const shown = new Set(["suez", "bab", "cape"]);
+  let routeMode = "transits";
+  $("#route-toggles").innerHTML = KEYS.map((k) => `<button type="button" data-k="${k}" aria-pressed="${shown.has(k)}"><i style="background:${cssVar(k)}"></i>${NAME[k]}</button>`).join("");
+  const routeChart = mount($("#route-chart"), (host, w) => {
+    const vol = routeMode === "volume";
+    const series = KEYS.filter((k) => shown.has(k)).map((k) => ({ name: NAME[k], color: k, values: vol ? R[k].volume.map((v) => v == null ? null : v / 1e6) : R[k].transits }));
+    const max = Math.max(1, ...series.flatMap((se) => se.values.filter((v) => v != null)));
+    monthChart(host, w, {
+      aria: "Monthly average daily transits at the route chokepoints", yMax: niceMax(max * 1.05), shadeFrom: "2023-11-19",
+      yFmt: (t) => vol ? t + " Mt" : t, left: vol ? 46 : 38,
+      series, endLabels: true, endWidth: 138, endLabel: (se, v) => `${se.name} ${vol ? v.toFixed(1) : f0(v)}`,
+      tooltip: (i) => `<div class="th">${monthLabel(M[i])} · ${vol ? "cargo, Mt per day" : "ships per day"}</div>${series.map((se) => tipRow(se.color, se.name, se.values[i] == null ? "–" : vol ? se.values[i].toFixed(2) : f1(se.values[i]))).join("")}`,
+    });
+  });
+  $("#route-toggles").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
+    const k = b.dataset.k;
+    if (shown.has(k) && shown.size > 1) shown.delete(k); else shown.add(k);
+    b.setAttribute("aria-pressed", String(shown.has(k)));
+    routeChart.render();
+  }));
+  segmented($("#route-mode"), (v) => { routeMode = v; routeChart.render(); });
+  const rpRows = [];
+  KEYS.forEach((k) => ["baseline", "crisis_2024", "year_2025", "latest"].forEach((p) => rpRows.push(rp(k, p))));
+  table($("#routes-table"), ["Chokepoint", "Period", "Ships / day", "vs baseline", "Cargo / day", "vs baseline"],
+    rpRows.map((r) => [r.chokepoint_name, r.period_label, f1(r.transits_per_day), r.period === "baseline" ? "–" : sp(r.transits_vs_baseline, 1), mt(r.volume_t_per_day), r.period === "baseline" ? "–" : sp(r.volume_vs_baseline, 1)]),
+    (ri, i) => rpRows[ri].period === "baseline" ? "" : i === 3 ? cls(rpRows[ri].transits_vs_baseline) : i === 5 ? cls(rpRows[ri].volume_vs_baseline) : "");
+
+  /* ---------------- Q3 Vessel types ---------------- */
+  const tanker = V.find((v) => v.vessel_type === "tanker"), bulk = V.find((v) => v.vessel_type === "dry_bulk"), roro = V.find((v) => v.vessel_type === "roro");
+  $("#ves-ctx").innerHTML = `In 2024, <b>container ship</b> transits fell ${sp(cont.transits_change_2024)} and their estimated cargo ${sp(cont.volume_change_2024)}; <b>ro-ro</b> ships (mostly car carriers) fell ${sp(roro.transits_change_2024)}. Tankers (${sp(tanker.transits_change_2024)}) and dry bulk carriers (${sp(bulk.transits_change_2024)}) fell less. Container ships account for <b>${pct(cont.share_of_lost_volume_2024)} of the cargo tonnes lost</b>, the largest share of any type. One plausible reason: container lines run fixed weekly loops and re-planned whole networks around Africa, while bulk and tanker voyages are booked one at a time.`;
+  let vesMode = "transits", vesPeriod = "2024";
+  const vesChart = mount($("#ves-chart"), (host, w) => {
+    const key = `${vesMode}_change_${vesPeriod}`;
+    divBars(host, w, {
+      aria: "Change in Suez transits by vessel type",
+      rows: V.map((v) => ({ label: v.vessel_label, color: v.vessel_type, v: v[key], r: v })),
+      tooltip: (row) => {
+        const r = row.r, vol = vesMode === "volume";
+        const base = vol ? r.baseline_volume_t : r.baseline_transits;
+        const now = vol ? (vesPeriod === "2024" ? r.crisis_2024_volume_t : r.latest_volume_t) : (vesPeriod === "2024" ? r.crisis_2024_transits : r.latest_transits);
+        const fmt = vol ? kt : f1;
+        return `<div class="th">${r.vessel_label} · Suez, per day</div>${tipRow(r.vessel_type, "Jan–Oct 2023", fmt(base))}${tipRow(r.vessel_type, vesPeriod === "2024" ? "2024" : "Latest " + latestDays + " days", fmt(now))}<div class="foot">${sp(row.v, 1)} · share of all ${vol ? "tonnes" : "ships"} lost in 2024: ${pct(vol ? r.share_of_lost_volume_2024 : r.share_of_lost_transits_2024)}</div>`;
+      },
+    });
+  });
+  segmented($("#ves-mode"), (v) => { vesMode = v; vesChart.render(); });
+  segmented($("#ves-period"), (v) => { vesPeriod = v; vesChart.render(); });
+  legend($("#mix-legend"), V.map((v) => ({ color: v.vessel_type, label: v.vessel_label })));
+  mount($("#mix-chart"), (host, w) => stack100(host, w, {
+    aria: "Share of Suez transits by vessel type",
+    rows: [
+      { label: "Jan–Oct 2023", parts: V.map((v) => ({ color: v.vessel_type, label: v.vessel_label, v: v.baseline_share })) },
+      { label: `Latest ${latestDays} days`, parts: V.map((v) => ({ color: v.vessel_type, label: v.vessel_label, v: v.latest_share })) },
+    ],
+  }));
+  table($("#ves-table"), ["Vessel type", "Ships / day 2023", "2024", "Latest", "Change 2024", "Change latest", "Tonnes / day 2023", "Tonnes change 2024", "Share of tonnes lost"],
+    V.map((v) => [v.vessel_label, f1(v.baseline_transits), f1(v.crisis_2024_transits), f1(v.latest_transits), sp(v.transits_change_2024, 1), sp(v.transits_change_latest, 1), kt(v.baseline_volume_t), sp(v.volume_change_2024, 1), pct(v.share_of_lost_volume_2024, 1)]),
+    (ri, i) => [4, 5, 7].includes(i) ? "neg" : "");
+
+  /* ---------------- Q4 Revenue ---------------- */
+  $("#rev-ctx").innerHTML = `The Suez Canal Authority reported a record <b>$10.25bn</b> for 2023 and <b>${bn(meta.sca.revenue_2024, 2)}</b> for 2024. Scaling 2023 by PortWatch's cargo-tonnage index gives ${bn(annual(2024).revenue_proxy_usd_annualised, 2)} for 2024, within ${pct(Math.abs(check2024), 1)} of the reported figure without using it. On the same method 2025 comes to <b>${bn(annual(2025).revenue_proxy_usd_annualised)}</b>, and 2026 is running at <b>${bn(annual(2026).revenue_proxy_usd_annualised)}</b> a year. Canal tolls are one of Egypt's main sources of foreign currency, so a gap of about $6bn a year weighs on the balance of payments.`;
+  legend($("#rev-legend"), [{ color: "suez", label: "Before the attacks" }, { color: "bab", label: "Since the attacks" }, { color: "ink", label: "SCA-reported revenue", kind: "diamond" }]);
+  mount($("#rev-chart"), (host, w) => yearBars(host, w, {
+    aria: "Suez Canal revenue proxy by year", yMax: 12e9, yFmt: (t) => "$" + (t / 1e9) + "bn",
+    rows: A.map((r) => ({ year: r.year, v: r.revenue_proxy_usd_annualised, color: r.year >= 2024 ? "bab" : "suez", partial: r.is_partial_year, ref: r.year === 2023 ? meta.sca.revenue_2023 : r.year === 2024 ? meta.sca.revenue_2024 : null, r })),
+    label: (row) => bn(row.v, row.v >= 1e10 ? 2 : 1) + (row.partial ? "*" : ""),
+    tooltip: (row) => `<div class="th">${row.year}${row.partial ? ` (annualised from ${row.r.days} days)` : ""}</div>${tipRow(row.color, "Revenue proxy", bn(row.v, 2))}${row.ref != null ? tipRow("ink", "SCA reported", bn(row.ref, 2)) : ""}${tipRow(row.color, "Suez transits", f0(row.r.transits))}${tipRow(row.color, "Cargo tonnes", f0(row.r.volume_t / 1e6) + " Mt")}<div class="foot">Tonnage index ${row.r.volume_index_2023.toFixed(2)} × 2023 revenue</div>`,
+  }));
+  $("#rev-stats").innerHTML = [
+    ["Transits not made", f0(Math.round(lostTotal.cumulative_lost_transits / 10) * 10), "vs the 2023 run-rate", "neg"],
+    ["Cargo not carried", (lostTotal.cumulative_lost_volume_t / 1e9).toFixed(2) + "bn t", "estimated tonnes", "neg"],
+    ["2024 proxy check", sp(check2024, 1), `${bn(annual(2024).revenue_proxy_usd_annualised, 2)} vs ${bn(meta.sca.revenue_2024, 2)} reported`, ""],
+    ["Transit count check", sp(annual(2023).transits / meta.sca.transits_2023 - 1, 1), `2023: ${f0(annual(2023).transits)} PortWatch vs ${f0(meta.sca.transits_2023)} SCA`, ""],
+  ].map(([k, v, s, c]) => `<div class="stat"><div class="k">${k}</div><div class="v ${c}">${v}</div><div class="s">${s}</div></div>`).join("");
+  $("#rev-note").textContent = `"Not made" compares each day from 19 Nov 2023 to ${dateLabel(meta.last_chokepoint_date)} with the Jan–Oct 2023 average for the same month (November and December use the ten-month average). For 2024 PortWatch counted ${f0(annual(2024).transits)} Suez transits and the SCA reported ${f0(meta.sca.transits_2024)}; the definitions differ (48-hour rule, cargo types only).`;
+  table($("#rev-table"), ["Year", "Days", "Suez transits", "Ships / day", "Tonnage index (2023 = 1)", "Revenue proxy", "SCA reported", "Transits not made"],
+    A.map((r) => {
+      const l = L.find((x) => x.year === r.year);
+      const ref = r.year === 2023 ? meta.sca.revenue_2023 : r.year === 2024 ? meta.sca.revenue_2024 : null;
+      return [r.year + (r.is_partial_year ? "*" : ""), r.days, f0(r.transits), f1(r.transits_per_day), r.volume_index_2023.toFixed(2), bn(r.revenue_proxy_usd_annualised, 2), ref ? bn(ref, 2) : "–", l ? f0(l.lost_transits) : "–"];
+    }));
+
+  /* ---------------- Q4b Ports ---------------- */
+  const COAST_COLOR = { Mediterranean: "med", "Gulf of Suez": "gulf", "Red Sea": "redsea" };
+  const portBy = (n) => D.ports.find((p) => p.port_name === n);
+  const dam = portBy("Damietta"), alex = portBy("Alexandria"), sidi = portBy("Sidi Kerir");
+  $("#ports-ctx").innerHTML = `Ships that skip the canal also skip Egypt's transshipment hubs, so a fall in port calls was possible. Overall the data does not show one. <b>El Sokhna</b>, at the Red Sea end of the canal, went from ${f1(sokhna.baseline_calls)} to ${f1(sokhna.latest_calls)} calls a day and from ${kt(sokhna.baseline_trade_t)} to ${kt(sokhna.latest_trade_t)} of cargo a day. Damietta held level (${sp(dam.calls_change_latest)}); Alexandria's calls slipped (${sp(alex.calls_change_latest)}) while its cargo tonnes rose (${sp(alex.trade_t_change_latest)}). <b>Sidi Kerir</b>, the Mediterranean end of the SUMED oil pipeline, rose ${sp(sidi.calls_change_latest)}. That fits more crude moving by pipeline instead of by tanker through the canal, but port counts alone cannot prove it. El Sokhna's growth may also reflect new terminal capacity, which this data cannot see.`;
+  legend($("#ports-legend"), Object.entries(COAST_COLOR).map(([k, c]) => ({ color: c, label: k })));
+  let portsMode = "calls";
+  const pf = {
+    calls: { b: "baseline_calls", l: "latest_calls", c: "calls_change_latest", fmt: (v) => f1(v) + "/day", label: "Port calls per day" },
+    box: { b: "baseline_container_calls", l: "latest_container_calls", c: "container_calls_change_latest", fmt: (v) => f1(v) + "/day", label: "Container calls per day" },
+    trade: { b: "baseline_trade_t", l: "latest_trade_t", c: "trade_t_change_latest", fmt: kt, label: "Cargo per day (import + export)" },
+  };
+  const portsChart = mount($("#ports-chart"), (host, w) => {
+    const f = pf[portsMode];
+    const rows = [...D.ports]
+      .filter((p) => p[f.b] > 0.03 || p[f.l] > 0.03 || portsMode !== "box")
+      .sort((a, b) => (b[f.c] ?? -9) - (a[f.c] ?? -9))
+      .map((p) => ({ label: p.port_name, color: COAST_COLOR[p.coast], v: p[f.c], note: `${f.fmt(p[f.b])} → ${f.fmt(p[f.l])}`, p }));
+    divBars(host, w, {
+      aria: "Change at Egyptian ports, latest 90 days against January to October 2023", rows,
+      tooltip: (row) => `<div class="th">${row.p.port_name} · ${row.p.coast}</div>${tipRow(row.color, "Jan–Oct 2023", f.fmt(row.p[f.b]))}${tipRow(row.color, "Latest " + latestDays + " days", f.fmt(row.p[f.l]))}<div class="foot">${f.label}: ${row.v == null ? "no baseline traffic" : sp(row.v, 1)}</div>`,
+    });
+  });
+  segmented($("#ports-mode"), (v) => { portsMode = v; portsChart.render(); });
+  const coastKeys = Object.keys(COAST_COLOR).filter((k) => D.coast[k]);
+  legend($("#coast-legend"), coastKeys.map((k) => ({ color: COAST_COLOR[k], label: k, kind: "line" })));
+  mount($("#coast-chart"), (host, w) => {
+    const series = coastKeys.map((k) => ({ name: k, color: COAST_COLOR[k], values: D.coast[k].calls, width: 2 }));
+    monthChart(host, w, {
+      aria: "Monthly port calls per day at Egyptian ports by coast", height: 230, left: 30,
+      yMax: niceMax(Math.max(...series.flatMap((se) => se.values.filter((v) => v != null))) * 1.05), shadeFrom: "2023-11-19",
+      yFmt: (t) => t, series,
+      tooltip: (i) => `<div class="th">${monthLabel(M[i])} · port calls per day</div>${series.map((se) => tipRow(se.color, se.name, f1(se.values[i]))).join("")}`,
+    });
+  });
+  table($("#ports-table"), ["Port", "Coast", "Calls / day 2023", "2024", "Latest", "Change", "Container calls 2023", "Latest", "Cargo / day 2023", "Latest", "Change"],
+    D.ports.map((p) => [p.port_name, p.coast, f1(p.baseline_calls), f1(p.crisis_2024_calls), f1(p.latest_calls), sp(p.calls_change_latest, 1), f1(p.baseline_container_calls), f1(p.latest_container_calls), kt(p.baseline_trade_t), kt(p.latest_trade_t), sp(p.trade_t_change_latest, 1)]),
+    (ri, i) => i === 5 ? cls(D.ports[ri].calls_change_latest) : i === 10 ? cls(D.ports[ri].trade_t_change_latest) : "");
+
+  /* ---------------- Integrity ---------------- */
+  const C = meta.checks;
+  const chokeQ = D.quality.filter((r) => r.layer === "chokepoint"), portQ = D.quality.filter((r) => r.layer === "port");
+  $("#int-ctx").innerHTML = `The pipeline tests the data before any analysis. These are the results of this build: ${meta.silver_rows.toLocaleString("en-US")} daily records from ${meta.raw_files} downloaded files, checked for gaps, duplicates and internal consistency, then compared with the canal authority's own count.`;
+  const checks = [
+    ["No missing days", `All 28 chokepoints have a record for every day from 1 Jan ${meta.first_year} to ${dateLabel(meta.last_chokepoint_date)} (${C.missing_chokepoint_days} gaps). Every Egyptian port has every day to ${dateLabel(meta.last_port_date)}.`],
+    ["No double counting", `${C.duplicates} duplicate place-day records after de-duplication.`],
+    ["Types add up to totals", `${C.count_mismatch_days} days where the five vessel types do not sum to PortWatch's published total. Tonnage differs by at most ${C.max_volume_gap_t} t, from rounding.`],
+    ["No dead days on the route", `${C.route_zero_days} days with zero transits at the five route chokepoints, so no AIS blackout is hiding in the averages.`],
+    ["Matches the canal's own count", `PortWatch counted ${f0(annual(2023).transits)} Suez transits in 2023; the SCA reported ${f0(meta.sca.transits_2023)} (${sp(annual(2023).transits / meta.sca.transits_2023 - 1, 1)}).`],
+    ["Download not truncated", "Every request is checked against the server's own record count before it is saved, so the 1,000-row page limit cannot silently drop rows."],
+  ];
+  $("#checks").innerHTML = checks.map(([t, d]) => `<div class="check"><span class="chip pass"><svg><use href="#i-check"/></svg>Pass</span><div class="t">${t}</div><div class="d">${d}</div></div>`).join("");
+  const eg = D.outliers.filter((o) => o.date >= "2021-03-23" && o.date <= "2021-03-29");
+  const egMin = eg.reduce((a, b) => (a.transits < b.transits ? a : b), eg[0]);
+  const counts = D.outlier_counts;
+  $("#eg-ctx").innerHTML = `An outlier query flags days where transits differ from the surrounding 15-day median by more than 50%. Without being told about it, it picks out the <b>Ever Given</b> grounding of March 2021: on ${dateLabel(egMin.date)} only ${egMin.transits} ships crossed, against a median of ${egMin.median_15d}. Across the five route chokepoints it flags ${Object.values(counts).reduce((a, b) => a + b, 0)} days, ${counts["Cape of Good Hope"] || 0} of them at the Cape, where reception is patchier. The ${D.outliers.length} Suez days are listed below.`;
+  table($("#outlier-table"), ["Date", "Ships", "15-day median", "Deviation", "Possible reading"],
+    D.outliers.map((o) => [dateLabel(o.date), f0(o.transits), f0(o.median_15d), sp(o.deviation), o.date >= "2021-03-23" && o.date <= "2021-03-29" ? "Ever Given blocks the canal" : o.deviation > 0 ? "Convoy catch-up or AIS bunching" : "Reception gap or weather"]),
+    (ri, i) => i === 3 ? cls(D.outliers[ri].deviation) : "");
+  table($("#int-table"), ["Place", "Layer", "Days", "First", "Last", "Coverage", "Zero days", "Sum mismatches"],
+    [...chokeQ, ...portQ].map((r) => [r.place, r.layer, f0(r.days_present), r.first_date, r.last_date, pct(r.coverage, 1), `${f0(r.zero_days)} (${pct(r.zero_share, 1)})`, r.count_mismatch_days]));
+
+  /* ---------------- About: pipeline ---------------- */
+  const stages = [
+    ["Source", "PortWatch API", "Public ArcGIS layers, paged 1,000 rows at a time"],
+    ["Raw", `${meta.raw_files} JSON files`, "2 daily layers × 1 file per year"],
+    ["Bronze", "As-is tables", "Loaded into DuckDB unchanged"],
+    ["Silver", `${meta.silver_rows.toLocaleString("en-US")} rows`, "Typed, renamed, one row per place per day"],
+    ["Gold", `${meta.gold_tables} tables`, `Star schema: ${Math.round(meta.fact_rows / 1000)}k fact rows by vessel type`],
+    ["Analysis", "10 SQL queries", "Feeding this dashboard and the README"],
+  ];
+  $("#pipeline").innerHTML = stages.map(([k, n, d], i) => `${i ? '<div class="arrow" aria-hidden="true"><svg width="16" height="16"><use href="#i-arrow"/></svg></div>' : ""}<div class="stage"><span class="k">${k}</span><span class="n">${n}</span><span class="d">${d}</span></div>`).join("");
+  $("#built").textContent = dateLabel(meta.built);
+
+  /* ---------------- theme + index ---------------- */
+  const root = document.documentElement;
+  $("#theme-btn").addEventListener("click", () => {
+    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem("suez-portwatch-theme", root.dataset.theme); } catch (e) { /* storage unavailable */ }
+  });
+  try { const t = localStorage.getItem("suez-portwatch-theme"); if (t && !root.dataset.theme) root.dataset.theme = t; } catch (e) { /* storage unavailable */ }
+
+  const links = [...document.querySelectorAll("#index a")];
+  const targets = links.map((a) => document.querySelector(a.getAttribute("href")));
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      const i = targets.indexOf(e.target);
+      links.forEach((a, j) => a.classList.toggle("on", j === i));
+      // Scroll only the nav strip sideways. scrollIntoView() here would also move the page
+      // (the link sits in a sticky bar) and cancel the reader's scroll momentum.
+      const strip = links[i].parentElement, a = links[i];
+      if (a.offsetLeft < strip.scrollLeft || a.offsetLeft + a.offsetWidth > strip.scrollLeft + strip.clientWidth) {
+        strip.scrollTo({ left: a.offsetLeft - 16, behavior: "auto" });
+      }
+    });
+  }, { rootMargin: "-30% 0px -60% 0px" });
+  targets.forEach((t) => t && io.observe(t));
+
+  charts.forEach((c) => ro.observe(c.host));
+  addEventListener("scroll", () => { if (tip.classList.contains("on")) hideTip(); }, { passive: true });
+})();
+</script>
+
+</body>
+</html>
